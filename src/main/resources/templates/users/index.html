@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<title>User</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+ <h1>User</h1>
+  <a class="btn btn-default" href="/users/new">新規作成</a>
+  <table  class="table table-hover table-striped">
+    <tr>
+     <th>name</th>
+     <th></th>
+     <th></th>
+    </tr>
+    <tr th:each="user : ${users}" th:object="${user}">
+      <td th:text="${user.name}">name</td>
+      <td><a class="btn btn-primary" th:href="@{/users/{name}(name=*{name})}">参照</a></td>
+      <td><a class="btn btn-primary" th:href="@{/users/{name}/edit(name=*{name})}">編集</a></td>
+    </tr>
+ </table>
+  <a class="btn btn-default" href="/">home</a>
+</body>
+</html>

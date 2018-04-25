@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+<head>
+<meta charset="UTF-8" />
+<title>index Thymeleaf</title>
+</head>
+<body>
+<h1>index Thymeleaf</h1>
+
+	<p>user: <span sec:authentication="name">表示されないの？</span></p>
+	<p>role:
+		<span sec:authorize="hasRole('ROLE_ADMIN')">管理者</span>
+		<span sec:authorize="hasRole('ROLE_USER')">一般者</span>
+		<span sec:authorize="hasRole('ROLE_API')">APIなので人ではない</span>
+	</p>
+
+<a href = "/fileupload"> ファイルアップロード</a>
+
+<form action="#" th:action="@{/logout}" method="post">
+	<input type="submit" value="ログアウト" />
+</form>
+</body>
+</html>
