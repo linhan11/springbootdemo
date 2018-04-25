@@ -23,7 +23,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                //.antMatchers("/").permitAll()
+                .antMatchers("/css/**", "/js/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
@@ -31,15 +31,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
             .logout()
-	            // ログアウトがパス(GET)の場合設定する（CSRF対応）
 	            .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-	            // ログアウトがPOSTの場合設定する
-	            //.logoutUrl("/logout")
-	            // ログアウト後の遷移先
 	            .logoutSuccessUrl("/login")
-	            // セッションを破棄する
 	            .invalidateHttpSession(true)
-	            // ログアウト時に削除するクッキー名
 	            .deleteCookies("JSESSIONID")
                 .permitAll();
     }
