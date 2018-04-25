@@ -33,6 +33,7 @@ public class UserController {
 	@GetMapping("{name}/edit")
 	public String edit(@PathVariable String name, Model model) {
 		DemoUser user = service.findOne(name);
+		user.setPassword("password");
         model.addAttribute("user", user);
  		return "users/edit";
 	}
