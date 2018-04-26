@@ -3,6 +3,7 @@ package jp.co.saison.tvc.springbootdemo.app;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -39,13 +40,14 @@ public class ChatHandler extends TextWebSocketHandler {
       roomSession.sendMessage(message);
     }
   }
-  
+
   /**
    * 多分websocketクローズ後に呼ばれる
    */
+  @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     String roomName = session.getUri().getQuery();
-    
+
     roomSessionPool.compute(roomName, (key, sessions)->{
       sessions.remove(session);
       if (sessions.isEmpty()) {

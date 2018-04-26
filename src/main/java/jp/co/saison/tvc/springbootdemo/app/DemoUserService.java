@@ -20,9 +20,9 @@ public class DemoUserService {
 		return repository.findAll();
 	}
 
-	public DemoUser findOne(String Name) {
+	public DemoUser findOne(String name) {
 		for (DemoUser user : repository.findAll()) {
-			if (Name.equals(user.getName())) {
+			if (name.equals(user.getName())) {
 				return user;
 			}
 		}
