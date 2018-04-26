@@ -18,6 +18,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
+    
+    @Autowired
+    MyLogoutHandler myLogoutHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -33,6 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .logout()
 	            .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
 	            .logoutSuccessUrl("/login")
+	            .addLogoutHandler(myLogoutHandler)
 	            .invalidateHttpSession(true)
 	            .deleteCookies("JSESSIONID")
                 .permitAll();
