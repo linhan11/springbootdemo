@@ -3,16 +3,49 @@
 <head>
 <meta charset="UTF-8"/>
 <title>Spring boot Hello world!</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/css/hmenu.css"  th:href="@{/css/hmenu.css}">
+
 </head>
 <body>
- <h1>ようこそ[[${#httpServletRequest.remoteUser}]]さん</h1>
+ <h1 class="headcolor">ようこそ[[${#httpServletRequest.remoteUser}]]さん</h1>
 
- <ul>
-  <li><a href="/chat">chat</a></li>
-  <li><a href="/users">users</a></li>
- </ul>
-<form action="#" th:action="@{/logout}" method="post">
-	<input type="submit" value="ログアウト" />
-</form>
+	<div id="wrapper">
+
+		<header id="header" class="clearfix">
+<!-- 			<h1 class="logo"></h1> -->
+			<div class="right">
+				<p class="open"><i class="fa fa-bars"></i> </p>
+			</div>
+		</header>
+	</div>
+
+
+    <input type="checkbox" class="check" id="checked">
+    <label class="menu-btn" for="checked">
+        <span class="bar top"></span>
+        <span class="bar middle"></span>
+        <span class="bar bottom"></span>
+        <span class="menu-btn__text">MENU</span>
+    </label>
+    <label class="close-menu" for="checked"></label>
+    <nav class="drawer-menu">
+        <ul>
+            <li><a href="#">プロフィール</a></li>
+            <li><a href="#">アカウント</a></li>
+            <li><a href="/logout">ログアウト</a></li>
+            <li><a href="/users">ユーザ一覧</a></li>
+        </ul>
+    </nav>
+    <div class="contents">
+        <div class="contents__inner">
+ 		<ul>
+  			<li><a href="/chat">chat</a></li>
+ 		</ul>
+        </div>
+    </div>
+</body>
+
+
 </body>
 </html>
