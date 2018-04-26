@@ -5,7 +5,11 @@
 <title>Spring boot Hello world!</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="/css/hmenu.css"  th:href="@{/css/hmenu.css}">
-
+<link rel="stylesheet" href="/css/profile.css"  th:href="@{/css/profile.css}">
+<script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+<!--
+<link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"></link>
+ -->
 </head>
 <body>
  <h1 class="headcolor">ようこそ[[${#httpServletRequest.remoteUser}]]さん</h1>
@@ -38,14 +42,96 @@
         </ul>
     </nav>
     <div class="contents">
-        <div class="contents__inner">
- 		<ul>
-  			<li><a href="/chat">chat</a></li>
- 		</ul>
-        </div>
-    </div>
+   		<div class="span1">
+			<div class="span3">ここがプロフィールエリア
+				<div class="rowprofile">
+					<div class="innerprofile">
+						<div class="imageprofile" style="background-image: url('/img/zoukirin.jpg');"></div>
+				        <div class="textprofile">テキストだよテキストだよテキストだよテキストだよテキストだよ...</div>
+				    </div>
+				</div>
+			</div>
+			<div class="span4">
+				<h2>チャット</h2>
+			    <div class="form-horizontal">
+			    	<div class="form-group">
+			    		<label for="roomName" class="col-sm-2 control-label">ルーム</label>
+			    		<div class="col-sm-2">
+			    			<input id="roomName" type="text" class="form-control" value="example" />
+			        	</div>
+			        </div>
+			        <div class="col-sm-3">
+			        	<button id="connectButton" type="button" class="btn btn-default">接続</button>
+			        	<button id="disconnectButton" class="btn btn-default">切断</button>
+			        </div>
+			    </div>
+				<div class="form-group">
+				    <label for="message" class="col-sm-2 control-label">メッセージ</label>
+				    <div class="col-sm-4">
+				    	<input id="message" type="text" class="form-control" />
+				    </div>
+				    <div class="col-sm-2">
+				    	<button id="sendButton" type="button" class="btn btn-default">送信</button>
+				    </div>
+				</div>
+				<div class="row">
+					<div class="col-sm-4 col-sm-offset-2">
+				    	<ul id="messageList" class="list-unstyled"> </ul>
+				    </div>
+				</div>
+			</div>
+		</div>
+		<div class="span2">
+			<!--Body content-->
+			ここが対戦相手一覧とかあるところ
+		</div>
+	</div>
+    <script>
+    $(function() {
+      var endpoint = 'ws://' + location.host + '/endpoint';
+      var webSocket = null;
+
+      $('#connectButton').click(function() {
+
+        $("#messageList").empty();
+
+        webSocket = new WebSocket(endpoint + '?' + encodeURIComponent($('#roomName').val()));
+        webSocket.onopen = function() {
+          $('#roomName').prop('disabled', true);
+          $('#connectButton').prop('disabled', true);
+          $('#disconnectButton').prop('disabled', false);
+        };
+        webSocket.onclose = function() {
+        };
+        webSocket.onmessage = function(message) {
+          $('#messageList').prepend($('<li>').text(message.data));
+        };
+        webSocket.onerror = function() {
+          alert('エラーが発生しました。');
+        };
+      });
+
+      $('#disconnectButton').click(function() {
+
+        webSocket.close();
+        webSocket = null;
+
+        $('#roomName').prop('disabled', false);
+        $('#connectButton').prop('disabled', false);
+        $('#disconnectButton').prop('disabled', true);
+      });
+
+      $('#sendButton').click(function() {
+        if (!webSocket) {
+          alert('未接続です。');
+          return;
+        }
+
+        webSocket.send($('#message').val());
+      });
+    });
+  </script>
 </body>
 
 
-</body>
 </html>
