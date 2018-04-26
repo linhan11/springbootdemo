@@ -9,7 +9,7 @@
   <body>
     <div class="container">
       <h1>Edit</h1>
-      <form th:action="@{/users/{name}(name=*{name})}" th:method="put" th:object="${user}">
+      <form th:action="@{/users}" th:method="put" th:object="${user}">
         <div class="form-group">
           <label class="control-label">名前</label>
           <input class="form-control" type="text" th:field="*{name}" />
