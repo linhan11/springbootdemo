@@ -84,6 +84,18 @@
 		<div class="span2">
 			<!--Body content-->
 			ここが対戦相手一覧とかあるところ
+            <table class="list">
+            <tr>
+            <th>ユーザ名</th>
+            <th>ログイン日時</th>
+            <th>ステータス</th>
+            </tr>
+            <tr th:each="login_users:${login_users}">
+              <td th:text="${login_users.name}">name</td>
+              <td th:text="${login_users.login_on}">login_on</td>
+              <td th:text="${login_users.status}">status</td>
+            </tr>
+            </table>
 		</div>
 	</div>
     <script>

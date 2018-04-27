@@ -27,6 +27,8 @@ public class RootController {
     List<LoginUser> login_users = service.findAll();
 
     System.out.println(login_users);
+    
+    model.addAttribute("login_users", login_users);
 
     return "home";
   }
