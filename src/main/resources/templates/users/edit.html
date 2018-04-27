@@ -18,10 +18,22 @@
           <label class="control-label">パスワード</label>
           <input class="form-control" type="text" th:field="*{password}" />
         </div>
+        <div class="form-group">
+          <label class="control-label">画像</label>
+          <input class="form-control" type="text" th:field="*{url}" />
+        </div>
+        <div class="form-group">
+          <label class="control-label">勝ち</label>
+          <p th:number="*{win}" />
+        </div>
+        <div class="form-group">
+          <label class="control-label">負け</label>
+          <p th:number="*{lose}" />
+        </div>
         <button class="btn btn-default" type="submit">更新</button>
       </form>
       <div class="pull-right">
-        <a class="btn btn-link" href="/users">一覧画面へ</a>
+        <a class="btn btn-link" href="/">画面へ</a>
       </div>
     </div>
   </body>

@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -13,7 +14,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Component
 public class ChatHandler extends TextWebSocketHandler {
   private ConcurrentHashMap<String, Set<WebSocketSession>> roomSessionPool =
-      new ConcurrentHashMap<>();
+			new ConcurrentHashMap<>();
+	@Autowired
+	DemoDataService service;
 
   /***
    * おそらくconnectionが成立したときに呼び出される
@@ -36,8 +39,22 @@ public class ChatHandler extends TextWebSocketHandler {
   @Override
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
     String roomName = session.getUri().getQuery();
+
+    /*
+     * やり取りしたメッセージをDBへ保持
+     *
+     * メッセージ形式
+     *   セッションID 識別子に利用 ユーザでわかるか？
+     *   ログインユーザ
+     *   メッセージ
+     *
+     * TODO:
+     *  ログインユーザ名を取得
+     */
      for (WebSocketSession roomSession : roomSessionPool.get(roomName)) {
       roomSession.sendMessage(message);
+      System.out.printf("%s:%s:%s\n", session.toString(), "unknown", message.getPayload().toString());
+      service.save(session.toString(), "unknown", message.getPayload().toString());
     }
   }
 

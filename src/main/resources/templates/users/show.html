@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="utf-8" />
-    <title>Show Player - baseball</title>
+    <title>Show</title>
 <script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
 <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"></link>
   </head>
@@ -18,11 +18,23 @@
           <label>パスワード</label>
           <p th:text="*{password}"></p>
         </div>
+        <div>
+          <label>画像</label>
+          <img th:src="*{url}" width="100"></p>
+        </div>
+        <div>
+          <label>勝ち</label>
+          <p th:text="*{win}"></p>
+        </div>
+        <div>
+          <label>負け</label>
+          <p th:text="*{lose}"></p>
+        </div>
       <div>
         <a class="btn btn-default" th:href="@{/users/edit}">編集</a>
       </div>
       <div class="pull-right">
-        <a class="btn btn-link" href="/users">一覧画面へ</a>
+        <a class="btn btn-link" href="/">画面へ</a>
       </div>
     </div>
   </body>
