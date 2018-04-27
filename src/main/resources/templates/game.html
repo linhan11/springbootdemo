@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+	<TITLE>オセロ：ステップ１</TITLE>
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+	<LINK REL="stylesheet" TYPE="text/css" HREF="../../../master.css">
+	<script src="/js/MainPanel.js" th:src="@{/js/MainPanel.js}"></script>
+	<script src="/js/GamePanel.js" th:src="@{/js/GamePanel.js}"></script>
+	<script src="/js/StartPanel.js" th:src="@{/js/StartPanel.js}"></script>
+</HEAD>
+<BODY CLASS="eeffee" onLoad="mp_start()">
+	<H1>オセロ：ステップ１</H1>
+	<CANVAS ID="canvas_e" STYLE="background-color: #ffffff;" WIDTH="435" HEIGHT="435"></CANVAS><BR>
+	<A HREF="method.htm" TARGET="method"><BUTTON ID="method" CLASS="std">遊び方</BUTTON></A>
+	<BUTTON ID="g_method0" CLASS="std" onClick="JavaScript: mp.method=0; gp_start()">対人間</BUTTON>
+	<BUTTON ID="g_method1" CLASS="std" onClick="JavaScript: mp.method=1; gp_start()">対コンピュータ（人先手）</BUTTON>
+	<BUTTON ID="g_method2" CLASS="std" onClick="JavaScript: mp.method=2; gp_start()">対コンピュータ（人後手）</BUTTON>
+	<TEXTAREA ID="ta" TYPE="text" NAME="ta" COLS="40" ROWS="5" CLASS="std"></TEXTAREA><BR>
+	<BUTTON ID="first" CLASS="std" onClick="st_start()">再開</BUTTON>
+	<BUTTON ID="finish" CLASS="std" onClick="mp.finish()">終了</BUTTON>
+</BODY>
+</HTML>
