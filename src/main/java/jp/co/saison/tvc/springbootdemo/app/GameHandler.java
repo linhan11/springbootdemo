@@ -12,8 +12,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 @Component
-public class ChatHandler extends TextWebSocketHandler {
-  private ConcurrentHashMap<String, Set<WebSocketSession>> roomSessionPool =
+public class GameHandler extends TextWebSocketHandler {
+  private ConcurrentHashMap<String, Set<WebSocketSession>> gameSessionPool =
 			new ConcurrentHashMap<>();
 	@Autowired
 	DemoDataService service;
@@ -23,8 +23,8 @@ public class ChatHandler extends TextWebSocketHandler {
    */
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-    String roomName = session.getUri().getQuery();
-    roomSessionPool.compute(roomName, (key, sessions) -> {
+    String userID = session.getUri().getQuery();
+    gameSessionPool.compute(userID, (key, sessions) -> {
       if (sessions == null) {
         sessions = new CopyOnWriteArraySet<>();
       }
@@ -38,7 +38,7 @@ public class ChatHandler extends TextWebSocketHandler {
    */
   @Override
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-    String roomName = session.getUri().getQuery();
+    String userID = session.getUri().getQuery();
 
     /*
      * やり取りしたメッセージをDBへ保持
@@ -51,9 +51,9 @@ public class ChatHandler extends TextWebSocketHandler {
      * TODO:
      *  ログインユーザ名を取得
      */
-     for (WebSocketSession roomSession : roomSessionPool.get(roomName)) {
-      roomSession.sendMessage(message);
-      System.out.printf("%s:%s:%s(%s)\n", session.toString(), "unknown", message.getPayload().toString(), message.getPayload());
+     for (WebSocketSession gameSession : gameSessionPool.get(userID)) {
+      gameSession.sendMessage(message);
+      System.out.printf("%s:%s:%s(%s)\n", session.toString(), "unknown", message.getPayload().toString(), message);
       service.save(session.toString(), "unknown", message.getPayload().toString());
     }
   }
@@ -65,7 +65,7 @@ public class ChatHandler extends TextWebSocketHandler {
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     String roomName = session.getUri().getQuery();
 
-    roomSessionPool.compute(roomName, (key, sessions)->{
+    gameSessionPool.compute(roomName, (key, sessions)->{
       sessions.remove(session);
       if (sessions.isEmpty()) {
       sessions = null;
