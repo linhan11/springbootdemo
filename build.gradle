@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.12.RELEASE'
+		springBootVersion = '2.0.1.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -37,7 +37,7 @@ dependencies {
 
 	// jpa db
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
-	compile('org.springframework.boot:spring-boot-starter-jdbc:1.5.6.RELEASE')
+	compile('org.springframework.boot:spring-boot-starter-jdbc:2.0.1.RELEASE')
 	compile('org.postgresql:postgresql:9.4.1212')
 	compile('org.hibernate:hibernate-gradle-plugin:4.3.8.Final')
 
