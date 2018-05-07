@@ -35,10 +35,25 @@ public class UserController {
 
 	/*
 	 * GET /users
-	 * ユーザプロフィールを表示
+	 * ユーザ一覧を表示
 	 */
 	@GetMapping
 	public String index(Model model, Principal principal) {
+		Authentication auth = (Authentication)principal;
+		if (auth == null) {
+	        return "redirect:/";
+		}
+		List<DemoUser> users = service.findAll();
+		model.addAttribute("users", users);
+		return "users/index";
+	}
+
+	/*
+	 * GET /users/show
+	 * ユーザプロフィールを表示
+	 */
+	@GetMapping("show")
+	public String show(Model model, Principal principal) {
 		Authentication auth = (Authentication)principal;
 		if (auth == null) {
 	        return "redirect:/";
@@ -47,13 +62,6 @@ public class UserController {
 		DemoUser user = service.findOne(name);
 		model.addAttribute("user", user);
 		return "users/show";
-	}
-
-	@GetMapping("list")
-	public String list(Model model) {
-		List<DemoUser> users = service.findAll();
-		model.addAttribute("users", users);
-		return "users/list";
 	}
 
 	/*
@@ -96,7 +104,7 @@ public class UserController {
 	@PutMapping
     public String update(@ModelAttribute DemoUser user, Model model, Principal principal) {
 		service.save(user);
-        return "redirect:/users";
+        return "redirect:/users/show";
     }
 
 	/*
