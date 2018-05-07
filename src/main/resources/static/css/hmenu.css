@@ -103,6 +103,7 @@ ul {
 /* checkbox */
 .check {
     display: none;
+    background: #032A50;
 }
 
 /* menu button - label tag */
@@ -243,6 +244,42 @@ ul {
 
 .headcolor {
 	color: #ffffff;
+	background: #032A50;
+	height: 80px;
+	margin-top:0px;
+	margin-bottom:0px;
+	display:flex;
+	align-items:center;
+	justify-content: center;
+
+}
+.clearfix {
+	height:0px;
 }
 
+.form-horizontal {
+	display: box;
+	display: -moz-box;
+	display: -o-box;
+	display: -webkit-box;
+	display: -ms-box;
+	box-orient: horizontal;
+	-moz-box-orient: horizontal;
+	-o-box-orient: horizontal;
+	-webkit-box-orient: horizontal;
+	-ms-box-orient: horizontal;
+	margin-top:8px;
+}
+
+.form-control {
+	width:200px;
+	margin-right:8px;
+}
+
+.col-sm-2-control-label {
+	width:85px;
+	display:flex;
+	align-items:center;
+	justify-content: center;
+}
 
