@@ -1,22 +1,144 @@
-<!DOCTYPE HTML>
-<HTML>
-<HEAD>
-	<TITLE>オセロ：ステップ１</TITLE>
-	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
-	<LINK REL="stylesheet" TYPE="text/css" HREF="../../../master.css">
-	<script src="/js/MainPanel.js" th:src="@{/js/MainPanel.js}"></script>
-	<script src="/js/GamePanel.js" th:src="@{/js/GamePanel.js}"></script>
-	<script src="/js/StartPanel.js" th:src="@{/js/StartPanel.js}"></script>
-</HEAD>
-<BODY CLASS="eeffee" onLoad="mp_start()">
-	<H1>オセロ：ステップ１</H1>
-	<CANVAS ID="canvas_e" STYLE="background-color: #ffffff;" WIDTH="435" HEIGHT="435"></CANVAS><BR>
-	<A HREF="method.htm" TARGET="method"><BUTTON ID="method" CLASS="std">遊び方</BUTTON></A>
-	<BUTTON ID="g_method0" CLASS="std" onClick="JavaScript: mp.method=0; gp_start()">対人間</BUTTON>
-	<BUTTON ID="g_method1" CLASS="std" onClick="JavaScript: mp.method=1; gp_start()">対コンピュータ（人先手）</BUTTON>
-	<BUTTON ID="g_method2" CLASS="std" onClick="JavaScript: mp.method=2; gp_start()">対コンピュータ（人後手）</BUTTON>
-	<TEXTAREA ID="ta" TYPE="text" NAME="ta" COLS="40" ROWS="5" CLASS="std"></TEXTAREA><BR>
-	<BUTTON ID="first" CLASS="std" onClick="st_start()">再開</BUTTON>
-	<BUTTON ID="finish" CLASS="std" onClick="mp.finish()">終了</BUTTON>
-</BODY>
-</HTML>
+<html>
+<head>
+<style type="text/css">
+    div {
+        float: left;
+
+        width: 60px;
+        height: 60px;
+        outline:1px solid #000;
+        padding-left: 10px;
+        padding-bottom: 10px;
+        background: white;
+
+        font-size: 60px;
+        overflow: hidden;
+    }
+
+    div:nth-of-type(3n + 1) {
+        clear:left
+    }
+        
+    p {
+        clear:both;
+        padding:10px 0;
+    }
+    
+    div.X {
+        color: green;
+    }
+
+    div.O {
+        color: blue;
+    }       
+
+</style>
+<script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+</head>
+<body>
+<h1>a</h1>
+<script type="text/javascript">
+var game = {}
+
+game.id = "";
+game.turn = "X";
+game.gridid = "";
+game.map = [
+	["", "", ""],
+	["", "", ""],
+	["", "", ""]
+];
+
+function send_message() {
+	console.log(game);
+}
+
+/*
+ * 配列へ変換
+ */
+function convert_map(game) {
+	var tmp;
+	var i;
+	var x = 0;
+	var y = 0;
+	for (i = 1; i <= 9; i++) {
+		tmp = $("#grid_" + i).text();
+		game.map[y][x] = tmp;
+		x++;
+		if (i % 3 == 0) {
+			y++;
+			x = 0;
+		}
+	}
+}
+
+/*
+ * 判定
+ * x x x
+ *
+ * y
+ * y
+ * y
+ *
+ * x
+ *   x
+ *     x
+ */
+function check_map(game) {
+}
+
+function set_piece(game) {
+	var gridid = game.gridid;
+	var tmp = $("#" + gridid).text();
+	if (tmp != "") {
+		console.log("div val : [" + tmp + "]");
+		return;
+	}
+
+	/*
+	 * 駒を置けた
+	 * Serverへmessageを送る
+	 */
+	$("#" + gridid).text(game.turn);
+
+	convert_map(game);
+
+
+	send_message();
+
+	if (game.turn == "X") {
+		game.turn = "O";
+	} else {
+		game.turn = "X";
+	}
+
+	$("#status").text(game.turn)
+}
+
+$(document).ready(function() {
+	$("div").click(function () {
+		console.log("name   : " + $("#name").val());
+		console.log("div id : " + this.id);
+		game.id = $("#name").val();
+		game.gridid = this.id;
+
+		set_piece(game);
+	})
+})
+</script>
+<p>
+name : <input type="text" id="name">
+</p>
+	    <div id="grid_1"></div>
+	    <div id="grid_2"></div>
+	    <div id="grid_3"></div>
+	    <div id="grid_4"></div>
+	    <div id="grid_5"></div>
+	    <div id="grid_6"></div>
+	    <div id="grid_7"></div>
+	    <div id="grid_8"></div>
+	    <div id="grid_9"></div>
+
+	    <p id="status"></p>
+</body>
+</html>
