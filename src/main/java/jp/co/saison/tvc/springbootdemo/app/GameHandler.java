@@ -15,8 +15,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class GameHandler extends TextWebSocketHandler {
   private ConcurrentHashMap<String, Set<WebSocketSession>> gameSessionPool =
 			new ConcurrentHashMap<>();
-	@Autowired
-	DemoDataService service;
 
   /***
    * おそらくconnectionが成立したときに呼び出される
@@ -24,6 +22,7 @@ public class GameHandler extends TextWebSocketHandler {
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
     String userID = session.getUri().getQuery();
+    System.out.printf("GameHandler:%s\n", userID);
     gameSessionPool.compute(userID, (key, sessions) -> {
       if (sessions == null) {
         sessions = new CopyOnWriteArraySet<>();
@@ -54,8 +53,7 @@ public class GameHandler extends TextWebSocketHandler {
      for (WebSocketSession gameSession : gameSessionPool.get(userID)) {
       gameSession.sendMessage(message);
       System.out.printf("%s:%s:%s(%s)\n", session.toString(), "unknown", message.getPayload().toString(), message);
-      service.save(session.toString(), "unknown", message.getPayload().toString());
-    }
+     }
   }
 
   /**
