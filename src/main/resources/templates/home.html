@@ -46,7 +46,8 @@
     </nav>
     <div class="contents">
    		<div class="span1">
-			<div class="span3">[[${#httpServletRequest.remoteUser}]]のプロフィール
+			<div class="span3" style="background:#fff;">
+				<h2>プロフィール</h2>
 				<div class="rowprofile">
 					<div class="innerprofile" style="height:103.42858px;">
 						<div class="imageprofile" style="background-image: url('/img/zoukirin.jpg');"></div>
@@ -54,7 +55,7 @@
 				    </div>
 				</div>
 			</div>
-			<div class="span4">
+			<div class="span4" style="background:#fffde8;">
 				<h2>チャット</h2>
 			    <div class="form-horizontal">
 		    		<label for="roomName" class="col-sm-2-control-label">ルーム</label>
@@ -64,19 +65,19 @@
 			    </div>
 				<div class="form-horizontal">
 				    <label for="message" class="col-sm-2-control-label">メッセージ</label>
-				    	<input id="message" type="text" class="form-control" style="width:376px;" />
+				    	<input id="message" type="text" class="form-control" maxlength='30' style="width:376px;" />
 				    	<button id="sendButton" type="button" class="btn btn-default">書き込み</button>
 				</div>
 				<div class="row">
-					<div class="col-sm-4 col-sm-offset-2" style="width:460px;">
+					<div class="col-sm-4 col-sm-offset-2" style="width:610px; margin-left:0px;">
 				    	<ul id="messageList" class="list-unstyled"> </ul>
 				    </div>
 				</div>
 			</div>
 		</div>
-		<div class="span2">
+		<div class="span2" style="margin-left:8px; margin-top:20px; background:#ffad90">
 			<!--Body content-->
-			ここが対戦相手一覧とかあるところ
+			<h2>対戦相手一覧</h2>
             <table class="list">
             <tr>
             <th>ユーザ名</th>
@@ -130,7 +131,7 @@
           alert('未接続です。');
           return;
         }
-        webSocket.send("[[${#httpServletRequest.remoteUser}]]" + " ： " + $('#message').val());
+        webSocket.send("[[${#httpServletRequest.remoteUser}]]" + " : " + $('#message').val());
       });
     });
 
