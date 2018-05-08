@@ -46,15 +46,117 @@
     </nav>
     <div class="contents">
    		<div class="span1">
-			<div class="span3">[[${#httpServletRequest.remoteUser}]]のプロフィール
-				<div class="rowprofile">
-					<div class="innerprofile" style="height:103.42858px;">
-						<div class="imageprofile" style="background-image: url('/img/zoukirin.jpg');"></div>
-				        <div class="textprofile">テキストだよテキストだよテキストだよテキストだよテキストだよ...</div>
-				    </div>
-				</div>
+			<div class="span3" style="background:#fff; height:300px;">
+
+				<h1>a</h1>
+				<script type="text/javascript">
+				var game = {}
+
+				game.id = "";
+				game.turn = "O";
+				game.gridid = "";
+				game.map = [
+					["", "", ""],
+					["", "", ""],
+					["", "", ""]
+				];
+
+				function send_message() {
+					console.log(game);
+				}
+
+				/*
+				 * 配列へ変換
+				 */
+				function convert_map(game) {
+					var tmp;
+					var i;
+					var x = 0;
+					var y = 0;
+					for (i = 1; i <= 9; i++) {
+						tmp = $("#grid_" + i).text();
+						game.map[y][x] = tmp;
+						x++;
+						if (i % 3 == 0) {
+							y++;
+							x = 0;
+						}
+					}
+				}
+
+				/*
+				 * 判定
+				 * x x x
+				 *
+				 * y
+				 * y
+				 * y
+				 *
+				 * x
+				 *   x
+				 *     x
+				 */
+				function check_map(game) {
+				}
+
+				function set_piece(game) {
+					var gridid = game.gridid;
+					var tmp = $("#" + gridid).text();
+					if (tmp != "") {
+						console.log("div val : [" + tmp + "]");
+						return;
+					}
+
+					/*
+					 * 駒を置けた
+					 * Serverへmessageを送る
+					 */
+					$("#" + gridid).text(game.turn);
+
+					convert_map(game);
+
+
+					send_message();
+
+					if (game.turn == "X") {
+						game.turn = "O";
+					} else {
+						game.turn = "X";
+					}
+
+					$("#turnstatus").text(game.turn)
+				}
+
+				$(document).ready(function() {
+					for (var i = 1; i <= 9; i++) {
+						$("#grid_" + i).click(function () {
+							console.log("name   : " + $("#name").val());
+							console.log("div id : " + this.id);
+							game.id = $("#name").val();
+							game.gridid = this.id;
+
+							set_piece(game);
+						})
+					}
+				})
+				</script>
+				<p>
+				name : <input type="text" id="name">
+				</p>
+					    <div id="grid_1" class="marupeke"></div>
+					    <div id="grid_2" class="marupeke"></div>
+					    <div id="grid_3" class="marupeke"></div>
+					    <div id="grid_4" class="marupeke"></div>
+					    <div id="grid_5" class="marupeke"></div>
+					    <div id="grid_6" class="marupeke"></div>
+					    <div id="grid_7" class="marupeke"></div>
+					    <div id="grid_8" class="marupeke"></div>
+					    <div id="grid_9" class="marupeke"></div>
+
+					    <p id="turnstatus" class="marupekestatus"></p>
+
 			</div>
-			<div class="span4">
+			<div class="span4" style="background:#fffde8;">
 				<h2>チャット</h2>
 			    <div class="form-horizontal">
 		    		<label for="roomName" class="col-sm-2-control-label">ルーム</label>
@@ -64,7 +166,7 @@
 			    </div>
 				<div class="form-horizontal">
 				    <label for="message" class="col-sm-2-control-label">メッセージ</label>
-				    	<input id="message" type="text" class="form-control" style="width:376px;" />
+				    	<input id="message" type="text" class="form-control" maxlength='30' style="width:376px;" />
 				    	<button id="sendButton" type="button" class="btn btn-default">書き込み</button>
 				</div>
 				<div class="row">
@@ -74,9 +176,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="span2">
+		<div class="span2" style="margin-left:8px; margin-top:20px; background:#ffad90">
 			<!--Body content-->
-			ここが対戦相手一覧とかあるところ
+			<h2>対戦相手一覧</h2>
             <table class="list">
             <tr>
             <th>ユーザ名</th>
@@ -130,25 +232,30 @@
           alert('未接続です。');
           return;
         }
-        webSocket.send("[[${#httpServletRequest.remoteUser}]]" + " ： " + $('#message').val());
+        webSocket.send("[[${#httpServletRequest.remoteUser}]]" + " : " + $('#message').val());
       });
     });
 
 
   // ゲーム用websocket
-  var now = new Date();
-  var start_date = now.toLocaleTimeString();
+  var now = new Date().toLocaleTimeString();
   sessionStorage.clear();
   window.sessionStorage.clear();
-  sessionStorage.setItem('start_date', start_date);
-  window.sessionStorage.setItem('start_date', start_date);
-  sessionStorage.access_count = start_date
-  
-  var uri = "ws://" + location.host + "/websocket/game" + '?' + "[[${#httpServletRequest.remoteUser}]]";
+  sessionStorage.setItem('start_date', now);
+  window.sessionStorage.setItem('start_date', now);
+  sessionStorage.start_date = now
+
+  var user = "[[${#httpServletRequest.remoteUser}]]";
+  var uri = "ws://" + location.host + "/websocket/game" + '?' + user;
 
   ws = new WebSocket(uri);
   ws.onopen = function() {
-    ws.send("aaa");
+    var loginData = new Object();
+    loginData.proto = "login";
+    loginData.from = user;
+    loginData.to = "";
+    loginData.start_date = now;
+    ws.send(JSON.stringify(loginData));
   };
   ws.onmessage = function() {
   };

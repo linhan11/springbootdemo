@@ -1,35 +1,52 @@
 package jp.co.saison.tvc.springbootdemo.app;
 
-import java.util.Set;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+// このクラスのインスタンスの持続期間はおそらくサーバ稼働中
+
 @Component
 public class GameHandler extends TextWebSocketHandler {
-  private ConcurrentHashMap<String, Set<WebSocketSession>> gameSessionPool =
-			new ConcurrentHashMap<>();
+  private ConcurrentHashMap<String, GameJSON> gameSessionData = new ConcurrentHashMap<>();
 
   /***
    * おそらくconnectionが成立したときに呼び出される
    */
   @Override
-  public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+  public void afterConnectionEstablished(WebSocketSession session) {
     String userID = session.getUri().getQuery();
-    System.out.printf("GameHandler:%s\n", userID);
-    gameSessionPool.compute(userID, (key, sessions) -> {
-      if (sessions == null) {
-        sessions = new CopyOnWriteArraySet<>();
-      }
-      sessions.add(session);
-      return sessions;
+    String sessionID = session.getId();
+    GameJSON g = new GameJSON(userID, sessionID, session);
+
+    // 今回のセッションをセッションプールに追加
+    gameSessionData.put(sessionID, g);
+
+    // 全セッションの情報を各ユーザに通知
+    List<String> userList = new ArrayList<>();
+    gameSessionData.forEach((key, value) -> {
+      userList.add(String.format("{\"ユーザ名\":\"%s\",\"状態\":\"%s\", \"ログイン日時\",\"%s\"}",
+          value.getUser(), value.isMtach() == true ? "対戦中" : "待機中", value.getStartDate()));
     });
+    String msg = "{\"proto\":\"login_list\",\"ログインユーザ\":[" + String.join(",", userList) + "]}";
+
+    TextMessage message = new TextMessage(msg.getBytes());
+    gameSessionData.forEach((key, value) -> {
+      try {
+        value.getSession().sendMessage(message);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    });
+
+    System.out.printf("GameHandler:%s %s msg=%s\n", userID, sessionID, msg);
   }
 
   /***
@@ -37,23 +54,17 @@ public class GameHandler extends TextWebSocketHandler {
    */
   @Override
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-    String userID = session.getUri().getQuery();
-
+    String sessionID = session.getId();
+    GameJSON g = gameSessionData.get(sessionID);
     /*
      * やり取りしたメッセージをDBへ保持
      *
-     * メッセージ形式
-     *   セッションID 識別子に利用 ユーザでわかるか？
-     *   ログインユーザ
-     *   メッセージ
+     * メッセージ形式 セッションID 識別子に利用 ユーザでわかるか？ ログインユーザ メッセージ
      *
-     * TODO:
-     *  ログインユーザ名を取得
+     * TODO: ログインユーザ名を取得
      */
-     for (WebSocketSession gameSession : gameSessionPool.get(userID)) {
-      gameSession.sendMessage(message);
-      System.out.printf("%s:%s:%s(%s)\n", session.toString(), "unknown", message.getPayload().toString(), message);
-     }
+    System.out.printf("sessionID:%s message:%s %s\n", sessionID, message.getPayload(),
+        g.getStartDate());
   }
 
   /**
@@ -61,16 +72,9 @@ public class GameHandler extends TextWebSocketHandler {
    */
   @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-    String roomName = session.getUri().getQuery();
-
-    gameSessionPool.compute(roomName, (key, sessions)->{
-      sessions.remove(session);
-      if (sessions.isEmpty()) {
-      sessions = null;
-      }
-      return sessions;
-    });
+    String sessionID = session.getId();
+    gameSessionData.remove(sessionID);
+    System.out.printf("session close sessionID:%s\n", sessionID);
   }
-
 
 }
