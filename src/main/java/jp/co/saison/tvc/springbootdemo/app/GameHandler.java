@@ -31,10 +31,10 @@ public class GameHandler extends TextWebSocketHandler {
     // 全セッションの情報を各ユーザに通知
     List<String> userList = new ArrayList<>();
     gameSessionData.forEach((key, value) -> {
-      userList.add(String.format("{\"ユーザ名\":\"%s\",\"状態\":\"%s\", \"ログイン日時\",\"%s\"}",
+      userList.add(String.format("{\"user\":\"%s\",\"status\":\"%s\", \"login_on\":\"%s\"}",
           value.getUser(), value.isMtach() == true ? "対戦中" : "待機中", value.getStartDate()));
     });
-    String msg = "{\"proto\":\"login_list\",\"ログインユーザ\":[" + String.join(",", userList) + "]}";
+    String msg = "{\"proto\":\"login_list\",\"login_list\":[" + String.join(",", userList) + "]}";
 
     TextMessage message = new TextMessage(msg.getBytes());
     gameSessionData.forEach((key, value) -> {
@@ -63,8 +63,11 @@ public class GameHandler extends TextWebSocketHandler {
      *
      * TODO: ログインユーザ名を取得
      */
-    System.out.printf("sessionID:%s message:%s %s\n", sessionID, message.getPayload(),
-        g.getStartDate());
+    
+    GameJSON gj = GameJSON.getInstanceFromJSON(message.getPayload());
+    
+    System.out.printf("sessionID:%s message:%s %s %s\n", sessionID, message.getPayload(),
+        g.getStartDate(), gj);
   }
 
   /**

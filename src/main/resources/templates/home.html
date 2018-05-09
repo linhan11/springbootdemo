@@ -238,13 +238,6 @@
 
 
   // ゲーム用websocket
-  var now = new Date().toLocaleTimeString();
-  sessionStorage.clear();
-  window.sessionStorage.clear();
-  sessionStorage.setItem('start_date', now);
-  window.sessionStorage.setItem('start_date', now);
-  sessionStorage.start_date = now
-
   var user = "[[${#httpServletRequest.remoteUser}]]";
   var uri = "ws://" + location.host + "/websocket/game" + '?' + user;
 
@@ -252,12 +245,20 @@
   ws.onopen = function() {
     var loginData = new Object();
     loginData.proto = "login";
-    loginData.from = user;
-    loginData.to = "";
-    loginData.start_date = now;
+    loginData.user = user;
     ws.send(JSON.stringify(loginData));
   };
-  ws.onmessage = function() {
+  ws.onmessage = function(message) {
+    try{
+      wsRes = JSON.parse(message.data);
+      if (wsRes.proto == "login_list"){
+    	alert(wsRes);
+      } else {
+    	alert(wsRes.proto);
+      }
+    } catch(e) {
+      alert(e);
+    }
   };
   ws.onclose = function(){
   }
