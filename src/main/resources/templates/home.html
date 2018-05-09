@@ -184,7 +184,21 @@
 		<div class="span2" style="margin-left:8px; margin-top:20px; background:#ffad90">
 		  <div class="boxmarur">
 			<span class="box-title">対戦相手一覧</span>
+			<!--
             <div id="UserTable"></div>
+			 -->
+			 <table class="table table-bordered table-hover table-striped" id="UserTable">
+			  <thead>
+			   <tr>
+			    <th>ユーザ名</th>
+			    <th>ログイン日時</th>
+			    <th>ステータス</th>
+			   </tr>
+			  <thead>
+			  <tbody id="userlist">
+			  </tbody>
+			 </table>
+
 		  </div>
 		</div>
 	</div>
@@ -247,7 +261,7 @@
     try{
       wsRes = JSON.parse(message.data);
       if (wsRes.proto == "login_list"){
-    	alert(wsRes);
+    	//alert(wsRes);
     	makeUserTable(wsRes);
       } else {
     	alert(wsRes.proto);
@@ -263,13 +277,18 @@
   };
 
   function clearUsertable(name) {
-	  var c = document.getElementById(name).children;
-	  for (var i = 0; i < c.length; i++) {
-		  c[i].remove();
-	  }
+	$("#userlist").empty();
   }
 
-  function makeUserTable(data){
+  function makeUserTable(data) {
+	  clearUsertable("userlist");
+	  for (var i = 0; i < data.login_list.length; i++ ){
+		$("#UserTable").append('<tr><td>' + data.login_list[i].user + '</td><td>' + data.login_list[i].login_on + '</td><td>' + data.login_list[i].status + '</td><td><button id="' + i + '" class="game-play btn btn-danger">対戦</button></td></tr>')
+	  }
+	  $("#UserTable").on("click",".game-play", function () {
+			 console.log(this.id);
+	  });
+	  /*
     var rows=[];
     var table = document.createElement("table");
 
@@ -298,6 +317,7 @@
       cell.appendChild(document.createTextNode(data.login_list[i].status));
     }
     document.getElementById("UserTable").appendChild(table);
+    */
   }
 
 
