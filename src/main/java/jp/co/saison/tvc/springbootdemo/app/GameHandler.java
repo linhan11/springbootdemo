@@ -29,7 +29,7 @@ public class GameHandler extends TextWebSocketHandler {
     // 今回のセッションをセッションプールに追加
     gameSessionData.put(sessionID, g);
 
-    // 全セッションの情報を各ユーザに通知
+    // 全セッションの情報をユーザリストとして組み立てる
     List<String> userList = new ArrayList<>();
     gameSessionData.forEach((key, value) -> {
       userList.add(String.format(
@@ -38,15 +38,8 @@ public class GameHandler extends TextWebSocketHandler {
     });
     String msg = "{\"proto\":\"login_list\",\"login_list\":[" + String.join(",", userList) + "]}";
 
-    TextMessage message = new TextMessage(msg.getBytes());
-    gameSessionData.forEach((key, value) -> {
-      try {
-        value.getSession().sendMessage(message);
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    });
+    //全ての接続に対し、ログインリストの更新を通知する
+    gameSessionData.forEach((key, value) -> {sendMSG(sessionID, msg);});
 
     System.out.printf("GameHandler:%s %s msg=%s\n", userID, sessionID, msg);
   }
