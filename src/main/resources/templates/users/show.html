@@ -1,41 +1,48 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="utf-8" />
-    <title>Show</title>
+<head>
+<meta charset="utf-8" />
+<title>アカウント</title>
 <script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
-<link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"></link>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Show</h1>
-      <div th:object="${user}">
-        <div>
-          <label>名前</label>
-          <p th:text="*{name}"></p>
-        </div>
-        <div>
-          <label>パスワード</label>
-          <p th:text="*{password}"></p>
-        </div>
-        <div>
-          <label>画像</label>
-          <img th:src="*{url}" width="100"></p>
-        </div>
-        <div>
-          <label>勝ち</label>
-          <p th:text="*{win}"></p>
-        </div>
-        <div>
-          <label>負け</label>
-          <p th:text="*{lose}"></p>
-        </div>
-      <div>
-        <a class="btn btn-default" th:href="@{/users/edit}">編集</a>
-      </div>
-      <div class="pull-right">
-        <a class="btn btn-link" href="/">画面へ</a>
-      </div>
-    </div>
-  </body>
+<link rel="stylesheet" href="/css/show.css" th:href="@{/css/show.css}" />
+<link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"></link>
+<link rel="stylesheet" href="/css/boxmaru.css"  th:href="@{/css/boxmaru.css}" />
+
+</head>
+<body class="bodyclass">
+	<div class="boxmaru">
+		<span class="box-title">アカウント</span>
+		<table>
+			<thead>
+				<tr>
+					<th>項目名</th>
+					<th>設定値</th>
+				</tr>
+			</thead>
+			<tbody th:object="${user}">
+
+				<tr>
+					<td>名前</td>
+					<td th:text="${user.name}"></td>
+				</tr>
+				<tr>
+					<td>画像</td>
+					<td><img th:src="${user.url}" width="100" /></td>
+				</tr>
+				<tr>
+					<td>勝ち</td>
+					<td th:text="${user.win}"></td>
+				</tr>
+				<tr>
+					<td>負け</td>
+					<td th:text="${user.lose}"></td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="buttons">
+			<a class="btn btn-default" th:href="@{/users/edit}"	href="/users/edit">編集</a>
+			<a class="btn btn-default" th:href="@{/}" href="/">戻る</a>
+		</div>
+	</div>
+</body>
 </html>
