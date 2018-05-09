@@ -283,3 +283,41 @@ ul {
 	justify-content: center;
 }
 
+.list-unstyled {
+	background: #fffde8;
+	box-shadow: 0px 0px 0px 10px #fffde8;/*線の外側*/
+	border: dashed 2px #ffb03f;/*破線*/
+	border-radius: 9px;
+	margin-top:20px;
+	margin-left: 10px;/*はみ出ないように調整*/
+	margin-right: 10px;/*はみ出ないように調整*/
+	padding: 0.5em 0.5em 0.5em 2em;
+
+	height:268px;
+	overflow:auto;
+}
+
+.marupeke {
+        float: left;
+
+        width: 60px;
+        height: 60px;
+        outline:1px solid #000;
+        background: white;
+
+        font-size: 60px;
+        overflow: hidden;
+
+        display:flex;
+		align-items:center;
+		justify-content: center;
+}
+
+.marupeke:nth-of-type(3n + 1)  {
+		clear:left
+}
+
+.marupekestatus {
+	    clear:both;
+        padding:10px 0;
+}
