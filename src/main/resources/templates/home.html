@@ -261,12 +261,23 @@
   ws.onerror = function() {
     alert("hello world!");
   };
+
+  function clearUsertable(name) {
+	  var c = document.getElementById(name).children;
+	  for (var i = 0; i < c.length; i++) {
+		  c[i].remove();
+	  }
+  }
+
   function makeUserTable(data){
     var rows=[];
     var table = document.createElement("table");
+
+    clearUsertable("UserTable");
+
     table.border = 2;
     table.createCaption().innerHTML="対戦相手一覧";
-  
+
     rows.push(table.insertRow(-1));//行の追加
     var title = ["ユーザ名", "ログイン日時", "ステータス"];
     for ( i = 0; i < title.length; i++ ){
@@ -279,10 +290,10 @@
       rows.push(table.insertRow(-1));//行の追加
       cell=rows[i+1].insertCell(-1);
       cell.appendChild(document.createTextNode(data.login_list[i].user));
-      
+
       cell=rows[i+1].insertCell(-1);
       cell.appendChild(document.createTextNode(data.login_list[i].login_on));
-      
+
       cell=rows[i+1].insertCell(-1);
       cell.appendChild(document.createTextNode(data.login_list[i].status));
     }
