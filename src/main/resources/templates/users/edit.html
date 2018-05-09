@@ -4,37 +4,41 @@
     <meta charset="utf-8" />
     <title>Editing Player - baseball</title>
 <script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
-<link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"></link>
+
+<link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" ></link>
+<link rel="stylesheet" href="/css/edituser.css"  th:href="@{/css/edituser.css}" />
+<link rel="stylesheet" href="/css/boxmaru.css"  th:href="@{/css/boxmaru.css}" />
+
   </head>
-  <body>
-    <div class="container">
-      <h1>Edit</h1>
-      <form th:action="@{/users}" th:method="put" th:object="${user}">
-        <div class="form-group">
-          <label class="control-label">名前</label>
-          <input class="form-control" type="text" th:field="*{name}" />
+  <body class="bodyclass">
+	<div class="boxmaru">
+	<span class="box-title">アカウント編集</span>
+    <form th:action="@{/users}" th:method="put" th:object="${user}">
+    	<div class="form-group">
+      		<label class="control-label">名前</label>
+        	<input class="form-control" type="text" th:field="*{name}" />
         </div>
         <div class="form-group">
-          <label class="control-label">パスワード</label>
-          <input class="form-control" type="text" th:field="*{password}" />
+        	<label class="control-label">パスワード</label>
+        	<input class="form-control" type="text" th:field="*{password}" />
         </div>
         <div class="form-group">
-          <label class="control-label">画像</label>
-          <input class="form-control" type="text" th:field="*{url}" />
+        	<label class="control-label">画像</label>
+        	<input class="form-control" type="text" th:field="*{url}" />
         </div>
         <div class="form-group">
-          <label class="control-label">勝ち</label>
-          <p th:number="*{win}" />
+        	<label class="control-label">勝ち</label>
+        	<p th:number="*{win}" />
         </div>
         <div class="form-group">
-          <label class="control-label">負け</label>
-          <p th:number="*{lose}" />
+        	<label class="control-label">負け</label>
+        	<p th:number="*{lose}" />
         </div>
-        <button class="btn btn-default" type="submit">更新</button>
-      </form>
-      <div class="pull-right">
-        <a class="btn btn-link" href="/">画面へ</a>
-      </div>
-    </div>
+        <div class="buttons">
+        	<button class="btn btn-default" type="submit">更新</button>
+        	<a class="btn btn-default" th:href="@{/}"  href="/">戻る</a>
+        </div>
+	</form>
+	</div>
   </body>
 </html>

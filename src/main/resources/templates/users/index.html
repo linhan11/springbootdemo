@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8"/>
-<title>User</title>
+<meta charset="UTF-8" />
+<title>ユーザ一覧</title>
 <script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
-<link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"></link>
+<link rel="stylesheet" href="/css/show.css" th:href="@{/css/show.css}" />
+<link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"></link>
+<link rel="stylesheet" href="/css/boxmaru.css" th:href="@{/css/boxmaru.css}" />
 </head>
-<body>
- <h1>User</h1>
-  <table  class="table table-hover table-striped">
-    <tr>
-     <th>name</th>
-     <th>win</th>
-     <th>lose</th>
-    </tr>
-    <tr th:each="user : ${users}" th:object="${user}">
-      <td th:text="${user.name}">name</td>
-      <td th:text="${user.win}">name</td>
-      <td th:text="${user.lose}">name</td>
-    </tr>
- </table>
-  <a class="btn btn-default" href="/">home</a>
+<body class="bodyclass">
+	<div class="boxmaru">
+		<span class="box-title">ユーザ一覧</span>
+		<table class="sortable" id="foo">
+			<tr>
+				<th>名前</th>
+				<th>勝ち</th>
+				<th>負け</th>
+			</tr>
+			<tr th:each="user : ${users}" th:object="${user}">
+				<td th:text="${user.name}">name</td>
+				<td th:text="${user.win}">name</td>
+				<td th:text="${user.lose}">name</td>
+			</tr>
+		</table>
+		<div class="buttons">
+			<a class="btn btn-default" href="/">戻る</a>
+		</div>
+	</div>
 </body>
 </html>
