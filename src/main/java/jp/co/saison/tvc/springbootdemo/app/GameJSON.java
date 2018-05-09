@@ -12,6 +12,8 @@ public class GameJSON {
   private String user;
   private String login_on; // ログイン日時
   private String sessionID;// セッションID
+  private String targetID; // 通信相手のセッションID
+  private String status;
   private boolean isMatch;// 対戦中の場合true
 
   @JsonIgnore
@@ -66,6 +68,14 @@ public class GameJSON {
 
   public String getProto() {
     return proto;
+  }
+
+  public String getTargetID() {
+    return targetID;
+  }
+
+  public String getStatus() {
+    return status;
   }
 
 }

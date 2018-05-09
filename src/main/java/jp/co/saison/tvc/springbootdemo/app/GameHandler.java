@@ -3,6 +3,7 @@ package jp.co.saison.tvc.springbootdemo.app;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -31,8 +32,9 @@ public class GameHandler extends TextWebSocketHandler {
     // 全セッションの情報を各ユーザに通知
     List<String> userList = new ArrayList<>();
     gameSessionData.forEach((key, value) -> {
-      userList.add(String.format("{\"user\":\"%s\",\"status\":\"%s\", \"login_on\":\"%s\",\"id\":\"%s\"}",
-          value.getUser(), value.isMtach() == true ? "対戦中" : "待機中", value.getStartDate(), value.getSessionID()));
+      userList.add(String.format(
+          "{\"user\":\"%s\",\"status\":\"%s\", \"login_on\":\"%s\",\"id\":\"%s\"}", value.getUser(),
+          value.isMtach() == true ? "対戦中" : "待機中", value.getStartDate(), value.getSessionID()));
     });
     String msg = "{\"proto\":\"login_list\",\"login_list\":[" + String.join(",", userList) + "]}";
 
@@ -56,18 +58,39 @@ public class GameHandler extends TextWebSocketHandler {
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
     String sessionID = session.getId();
     GameJSON g = gameSessionData.get(sessionID);
-    /*
-     * やり取りしたメッセージをDBへ保持
-     *
-     * メッセージ形式 セッションID 識別子に利用 ユーザでわかるか？ ログインユーザ メッセージ
-     *
-     * TODO: ログインユーザ名を取得
-     */
 
     GameJSON gj = GameJSON.getInstanceFromJSON(message.getPayload());
 
+    switch (gj.getProto()) {
+      case "matchWithReq": // 対戦の申し込み {"proto":"matchWithReq","targetID":"targetSeesionID"}
+        sendMSG(gj.getTargetID(), "{\"proto\":\"matchWithReq\",\"targetID\":\"" + sessionID + "\"}");
+        break;
+      case "matchWithRep": // 対戦の申し込み結果 {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
+        if ( gj.getStatus().equals("OK")) {
+          //OKの場合は両セッションにメッセージを送る
+          int s = new Random().nextInt(2);
+          String fmt = "{\"proto\":\"matchStart\",\"targetID\":\"%s\", \"status\":\"%s\"}";
+          sendMSG(gj.getTargetID(), String.format(fmt, sessionID, s==0?"First":"Second"));
+          sendMSG(sessionID, String.format(fmt, gj.getTargetID(), s==0?"Second":"First"));
+        } else {
+          //NGの場合は申し込んだほうのセッションにのみメッセージを送る
+          sendMSG(gj.getTargetID(), "{\"proto\":\"matchWithRep\",\"targetID\":\"" + sessionID + "\", \"status\":\"NG\"}");
+        }
+      default:
+        break;
+    }
+
     System.out.printf("sessionID:%s message:%s %s %s\n", sessionID, message.getPayload(),
         g.getStartDate(), gj);
+
+  }
+
+  private void sendMSG(String targetID, String msg) {
+    try {
+      gameSessionData.get(targetID).getSession().sendMessage(new TextMessage(msg.getBytes()));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
