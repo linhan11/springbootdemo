@@ -1,55 +1,52 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8"/>
+<meta charset="UTF-8" />
 <title>Spring boot Hello world!</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="/css/hmenu.css"  th:href="@{/css/hmenu.css}" />
-<link rel="stylesheet" href="/css/profile.css"  th:href="@{/css/profile.css}" />
+<link rel="stylesheet" href="/css/hmenu.css" th:href="@{/css/hmenu.css}" />
+<link rel="stylesheet" href="/css/profile.css" th:href="@{/css/profile.css}" />
 <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
+<link rel="stylesheet" href="/css/boxmaru.css" th:href="@{/css/boxmaru.css}" />
 <script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
 
-<!--
-<link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"></link>
- -->
 </head>
 <body>
- <h1 class="headcolor">ようこそ[[${#httpServletRequest.remoteUser}]]さん</h1>
+	<h1 class="headcolor">ようこそ[[${#httpServletRequest.remoteUser}]]さん</h1>
 
 	<div id="wrapper">
 
 		<header id="header" class="clearfix">
-<!-- 			<h1 class="logo"></h1> -->
+			<!-- 			<h1 class="logo"></h1> -->
 			<div class="right">
-				<p class="open"><i class="fa fa-bars"></i> </p>
+				<p class="open">
+					<i class="fa fa-bars"></i>
+				</p>
 			</div>
 		</header>
 	</div>
 
 
-    <input type="checkbox" class="check" id="checked">
-    <label class="menu-btn" for="checked">
-        <span class="bar top"></span>
-        <span class="bar middle"></span>
-        <span class="bar bottom"></span>
-        <span class="menu-btn__text">MENU</span>
-    </label>
-    <label class="close-menu" for="checked"></label>
-    <nav class="drawer-menu">
-        <ul>
-            <li><a href="#">プロフィール</a></li>
-            <li><a href="#">アカウント</a></li>
-            <li><a href="/logout">ログアウト</a></li>
-            <li><a href="/users">ユーザ一覧</a></li>
-            <li><a href="/taisenroom">対戦部屋</a></li>
-        </ul>
-    </nav>
-    <div class="contents">
-   		<div class="span1">
-			<div class="span3" style="background:#fff; height:300px;">
+	<input type="checkbox" class="check" id="checked">
+	<label class="menu-btn" for="checked"> <span class="bar top"></span>
+		<span class="bar middle"></span> <span class="bar bottom"></span> <span
+		class="menu-btn__text">MENU</span>
+	</label>
+	<label class="close-menu" for="checked"></label>
+	<nav class="drawer-menu">
+		<ul>
+			<li><a href="/users/show">アカウント</a></li>
+			<li><a href="/logout">ログアウト</a></li>
+			<li><a href="/users">ユーザ一覧</a></li>
+		</ul>
+	</nav>
+	<div class="contents">
+		<div class="span1">
+			<div class="boxmarub">
+				<span class="box-title">まるぺけ対戦</span>
+				<div class="span3" style="background: #fff; height: 300px;">
 
-				<h1>a</h1>
-				<script type="text/javascript">
+					<script type="text/javascript">
 				var game = {}
 
 				game.id = "";
@@ -140,60 +137,58 @@
 					}
 				})
 				</script>
-				<p>
-				name : <input type="text" id="name">
-				</p>
-					    <div id="grid_1" class="marupeke"></div>
-					    <div id="grid_2" class="marupeke"></div>
-					    <div id="grid_3" class="marupeke"></div>
-					    <div id="grid_4" class="marupeke"></div>
-					    <div id="grid_5" class="marupeke"></div>
-					    <div id="grid_6" class="marupeke"></div>
-					    <div id="grid_7" class="marupeke"></div>
-					    <div id="grid_8" class="marupeke"></div>
-					    <div id="grid_9" class="marupeke"></div>
+					<p style="margin-bottom: 15px;">
+						name : <input type="text" id="name">
+					</p>
+					<div id="grid_1" class="marupeke"></div>
+					<div id="grid_2" class="marupeke"></div>
+					<div id="grid_3" class="marupeke"></div>
+					<div id="grid_4" class="marupeke"></div>
+					<div id="grid_5" class="marupeke"></div>
+					<div id="grid_6" class="marupeke"></div>
+					<div id="grid_7" class="marupeke"></div>
+					<div id="grid_8" class="marupeke"></div>
+					<div id="grid_9" class="marupeke"></div>
 
-					    <p id="turnstatus" class="marupekestatus"></p>
+					<p id="turnstatus" class="marupekestatus"></p>
 
-			</div>
-			<div class="span4" style="background:#fffde8;">
-				<h2>チャット</h2>
-			    <div class="form-horizontal">
-		    		<label for="roomName" class="col-sm-2-control-label">ルーム</label>
-	    			<input id="roomName" type="text" class="form-control" value="example" style="width:126px;" />
-		        	<button id="connectButton" type="button" class="btn btn-default">接続</button>
-		        	<button id="disconnectButton" class="btn btn-default" disabled="disabled">切断</button>
-			    </div>
-				<div class="form-horizontal">
-				    <label for="message" class="col-sm-2-control-label">メッセージ</label>
-				    	<input id="message" type="text" class="form-control" maxlength='30' style="width:376px;" />
-				    	<button id="sendButton" type="button" class="btn btn-default">書き込み</button>
 				</div>
-				<div class="row">
-					<div class="col-sm-4 col-sm-offset-2" style="width:610px; margin-left:0px;">
-				    	<ul id="messageList" class="list-unstyled"> </ul>
-				    </div>
+			</div>
+			<div class="boxmaruy">
+				<span class="box-title">チャット</span>
+				<div class="span4" style="background: #fffde8;">
+					<div class="form-horizontal">
+						<label for="roomName" class="col-sm-2-control-label">ルーム</label> <input
+							id="roomName" type="text" class="form-control" value="example"
+							style="width: 126px;" />
+						<button id="connectButton" type="button" class="btn btn-default">接続</button>
+						<button id="disconnectButton" class="btn btn-default"
+							disabled="disabled">切断</button>
+					</div>
+					<div class="form-horizontal">
+						<label for="message" class="col-sm-2-control-label">メッセージ</label>
+						<input id="message" type="text" class="form-control"
+							maxlength='30' style="width: 376px;" />
+						<button id="sendButton" type="button" class="btn btn-default">書き込み</button>
+					</div>
+					<div class="row">
+						<div class="col-sm-4 col-sm-offset-2"
+							style="width: 610px; margin-left: 0px;">
+							<ul id="messageList" class="list-unstyled">
+							</ul>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 		<div class="span2" style="margin-left:8px; margin-top:20px; background:#ffad90">
-			<!--Body content-->
-			<h2>対戦相手一覧</h2>
-            <table class="list">
-            <tr>
-            <th>ユーザ名</th>
-            <th>ログイン日時</th>
-            <th>ステータス</th>
-            </tr>
-            <tr th:each="login_users:${login_users}">
-              <td th:text="${login_users.name}">name</td>
-              <td th:text="${login_users.login_on}">login_on</td>
-              <td th:text="${login_users.status}">status</td>
-            </tr>
-            </table>
+		  <div class="boxmarur">
+			<span class="box-title">対戦相手一覧</span>
+            <div id="UserTable"></div>
+		  </div>
 		</div>
 	</div>
-    <script>
+	<script>
     $(function() {
       var endpoint = 'ws://' + location.host + '/endpoint';
       var webSocket = null;
@@ -253,6 +248,7 @@
       wsRes = JSON.parse(message.data);
       if (wsRes.proto == "login_list"){
     	alert(wsRes);
+    	makeUserTable(wsRes);
       } else {
     	alert(wsRes.proto);
       }
@@ -265,6 +261,33 @@
   ws.onerror = function() {
     alert("hello world!");
   };
+  function makeUserTable(data){
+    var rows=[];
+    var table = document.createElement("table");
+    table.border = 2;
+    table.createCaption().innerHTML="対戦相手一覧";
+  
+    rows.push(table.insertRow(-1));//行の追加
+    var title = ["ユーザ名", "ログイン日時", "ステータス"];
+    for ( i = 0; i < title.length; i++ ){
+      cell=rows[0].insertCell(-1);
+      cell.appendChild(document.createTextNode(title[i]));
+      cell.style.backgroundColor = "#bbb"
+    }
+
+    for (i = 0; i < data.login_list.length; i++ ){
+      rows.push(table.insertRow(-1));//行の追加
+      cell=rows[i+1].insertCell(-1);
+      cell.appendChild(document.createTextNode(data.login_list[i].user));
+      
+      cell=rows[i+1].insertCell(-1);
+      cell.appendChild(document.createTextNode(data.login_list[i].login_on));
+      
+      cell=rows[i+1].insertCell(-1);
+      cell.appendChild(document.createTextNode(data.login_list[i].status));
+    }
+    document.getElementById("UserTable").appendChild(table);
+  }
 
 
   </script>
