@@ -31,8 +31,8 @@ public class GameHandler extends TextWebSocketHandler {
     // 全セッションの情報を各ユーザに通知
     List<String> userList = new ArrayList<>();
     gameSessionData.forEach((key, value) -> {
-      userList.add(String.format("{\"user\":\"%s\",\"status\":\"%s\", \"login_on\":\"%s\"}",
-          value.getUser(), value.isMtach() == true ? "対戦中" : "待機中", value.getStartDate()));
+      userList.add(String.format("{\"user\":\"%s\",\"status\":\"%s\", \"login_on\":\"%s\",\"id\":\"%s\"}",
+          value.getUser(), value.isMtach() == true ? "対戦中" : "待機中", value.getStartDate(), value.getSessionID()));
     });
     String msg = "{\"proto\":\"login_list\",\"login_list\":[" + String.join(",", userList) + "]}";
 
@@ -63,9 +63,9 @@ public class GameHandler extends TextWebSocketHandler {
      *
      * TODO: ログインユーザ名を取得
      */
-    
+
     GameJSON gj = GameJSON.getInstanceFromJSON(message.getPayload());
-    
+
     System.out.printf("sessionID:%s message:%s %s %s\n", sessionID, message.getPayload(),
         g.getStartDate(), gj);
   }

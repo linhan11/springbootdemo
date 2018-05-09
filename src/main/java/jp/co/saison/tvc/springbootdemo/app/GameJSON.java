@@ -3,12 +3,9 @@ package jp.co.saison.tvc.springbootdemo.app;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import org.springframework.web.socket.WebSocketSession;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.SimpleDateFormat;
 
 public class GameJSON {
   private String proto;// プロトコル種別
@@ -35,6 +32,10 @@ public class GameJSON {
 
   public WebSocketSession getSession() {
     return session;
+  }
+
+  public String getSessionID() {
+    return sessionID;
   }
 
   public String getStartDate() {
