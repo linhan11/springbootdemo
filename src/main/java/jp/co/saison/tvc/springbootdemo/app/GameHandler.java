@@ -39,7 +39,7 @@ public class GameHandler extends TextWebSocketHandler {
     String msg = "{\"proto\":\"login_list\",\"login_list\":[" + String.join(",", userList) + "]}";
 
     //全ての接続に対し、ログインリストの更新を通知する
-    gameSessionData.forEach((key, value) -> {sendMSG(sessionID, msg);});
+    gameSessionData.forEach((key, value) -> {sendMSG(value.getSessionID(), msg);});
 
     System.out.printf("GameHandler:%s %s msg=%s\n", userID, sessionID, msg);
   }
