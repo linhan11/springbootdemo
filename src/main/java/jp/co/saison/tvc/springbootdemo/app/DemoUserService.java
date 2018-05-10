@@ -35,4 +35,9 @@ public class DemoUserService {
         return repository.save(user);
     }
 
+    public void delete(DemoUser user) {
+    	repository.delete(user);
+    	return;
+    }
+
 }

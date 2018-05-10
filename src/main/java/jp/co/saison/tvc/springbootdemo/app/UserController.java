@@ -1,23 +1,29 @@
 package jp.co.saison.tvc.springbootdemo.app;
 
 import java.security.Principal;
-import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.client.RestTemplate;
 
 @Controller
 @RequestMapping("/users")
 public class UserController {
 	@Autowired
 	DemoUserService service;
+
+	String url = "http://localhost:8080/api/users";
+
 
 	private DemoUser createUser(Principal principal) {
 		Authentication auth = (Authentication)principal;
@@ -37,13 +43,19 @@ public class UserController {
 	 * GET /users
 	 * ユーザ一覧を表示
 	 */
+	@SuppressWarnings("unchecked")
 	@GetMapping
 	public String index(Model model, Principal principal) {
 		Authentication auth = (Authentication)principal;
 		if (auth == null) {
 	        return "redirect:/";
 		}
-		List<DemoUser> users = service.findAll();
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		ResponseEntity<? extends ArrayList<DemoUser>> responseEntity = restTemplate.getForEntity(url, (Class<? extends ArrayList<DemoUser>>)ArrayList.class);
+		ArrayList<DemoUser> users = responseEntity.getBody();
+
 		model.addAttribute("users", users);
 		return "users/index";
 	}
@@ -58,8 +70,13 @@ public class UserController {
 		if (auth == null) {
 	        return "redirect:/";
 		}
+
+		RestTemplate restTemplate = new RestTemplate();
+
 		String name = auth.getName();
-		DemoUser user = service.findOne(name);
+
+		DemoUser user = restTemplate.getForObject(url + "/" + name, DemoUser.class);
+
 		model.addAttribute("user", user);
 		return "users/show";
 	}
@@ -90,8 +107,10 @@ public class UserController {
 		if (auth == null) {
 	        return "redirect:/";
 		}
+
+		RestTemplate restTemplate = new RestTemplate();
 		String name = auth.getName();
-		DemoUser user = service.findOne(name);
+		DemoUser user = restTemplate.getForObject(url + "/" + name, DemoUser.class);
 		user.setPassword("password");
         model.addAttribute("user", user);
  		return "users/edit";
@@ -99,11 +118,14 @@ public class UserController {
 
 	/*
 	 * PUT /users
-	 * ユーザ情報の更新
+	 * ユーザ情報の登録・更新
 	 */
 	@PutMapping
     public String update(@ModelAttribute DemoUser user, Model model, Principal principal) {
-		service.save(user);
+		RestTemplate restTemplate = new RestTemplate();
+
+		restTemplate.postForEntity(url, user, DemoUser.class);
+
         return "redirect:/users/show";
     }
 
@@ -113,9 +135,20 @@ public class UserController {
 	 */
     @PostMapping
     public String create(@ModelAttribute DemoUser user, Model model) {
-    	service.save(user);
+		RestTemplate restTemplate = new RestTemplate();
+
+		restTemplate.postForObject(url, user, DemoUser.class);
+
         return "redirect:/";
     }
 
+    @DeleteMapping
+    public String delete(@ModelAttribute DemoUser user, Model model) {
+		RestTemplate restTemplate = new RestTemplate();
+
+		restTemplate.delete(url, user);
+
+		return "redirect:/";
+    }
 
 }
