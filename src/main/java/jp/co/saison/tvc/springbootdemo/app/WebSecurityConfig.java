@@ -44,7 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll();
 
         /**
-         * CSRFé©ç”¨URLåˆ¤æ–­ã‚¯ãƒ©ã‚¹
+         * CSRF“K—pURL”»’fƒNƒ‰ƒX
          */
 
         RequestMatcher csrfRequestMatcher = new RequestMatcher() {
@@ -55,12 +55,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             @Override
             public boolean matches(HttpServletRequest request) {
 
-                // GETãªã‚‰CSRFã®ãƒã‚§ãƒƒã‚¯ã¯ã—ãªã„
+                // GET‚È‚çCSRF‚Ìƒ`ƒFƒbƒN‚Í‚µ‚È‚¢
                 if("GET".equals(request.getMethod())) {
                     return false;
                 }
 
-                // ç‰¹å®šã®URLã«è©²å½“ã™ã‚‹å ´åˆã€CSRFãƒã‚§ãƒƒã‚¯ã—ãªã„
+                // “Á’è‚ÌURL‚ÉŠY“–‚·‚éê‡ACSRFƒ`ƒFƒbƒN‚µ‚È‚¢
                 return !disabledRequestMatcher.matches(request);
             }
 
