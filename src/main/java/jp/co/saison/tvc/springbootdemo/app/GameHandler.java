@@ -43,12 +43,14 @@ public class GameHandler extends TextWebSocketHandler {
           "{\"user\":\"%s\",\"status\":\"%s\", \"login_on\":\"%s\",\"id\":\"%s\"}", value.getUser(),
           value.isMtach() == true ? "対戦中" : "待機中", value.getStartDate(), value.getSessionID()));
     });
-    String msg = "{\"proto\":\"login_list\",\"login_list\":[" + String.join(",", userList) + "]}";
+    String fmt = "{\"proto\":\"login_list\",\"id\":\"%s\", \"login_list\":[" + String.join(",", userList) + "]}";
 
     // 全ての接続に対し、ログインリストの更新を通知する
-    gameSessionData.forEach((key, value) -> {sendMSG(key, msg);});
-
-    System.out.printf("msg=%s\n", msg);
+    gameSessionData.forEach((key, value) -> {
+      String msg = String.format(fmt, key);
+      sendMSG(key, msg);
+      System.out.printf("msg=%s\n", msg);
+    });
 
   }
 
@@ -57,37 +59,54 @@ public class GameHandler extends TextWebSocketHandler {
    */
   @Override
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-    String sessionID = session.getId();
-    GameJSON g = gameSessionData.get(sessionID);
+    String myID = session.getId();
+    GameJSON myGameData = gameSessionData.get(myID);
+    GameJSON targetGameData = null;
+    GameJSON msgToGameJson = GameJSON.getInstanceFromJSON(message.getPayload());
+    String targetID = msgToGameJson.getTargetID();
 
-    GameJSON gj = GameJSON.getInstanceFromJSON(message.getPayload());
+    if (targetID != null && targetID.isEmpty() == false) {
+      targetGameData = gameSessionData.get(targetID);
+    }
 
-    switch (gj.getProto()) {
+    switch (msgToGameJson.getProto()) {
       case "matchWithReq": // 対戦の申し込み {"proto":"matchWithReq","targetID":"targetSeesionID"}
-        sendMSG(gj.getTargetID(),
-            "{\"proto\":\"matchWithReq\",\"targetID\":\"" + sessionID + "\"}");
+
+        // 対戦相手のセッション情報を取得
+        if (targetGameData.getProgress() == GameJSON.PROGRESS.MATCHWIDH
+            || targetGameData.getProgress() == GameJSON.PROGRESS.MATCHING) {
+          // 対戦待ちもしくは対戦中の場合は申し込みを却下
+          sendMSG(myID, "{\"proto\":\"matchWithRep\",\"targetID\":\"" + msgToGameJson.getTargetID()
+              + "\", \"status\":\"NG\"}");
+          return;
+        }
+        // 自分の状態遷移を対戦申込み中に変更
+        myGameData.setProgress(GameJSON.PROGRESS.MATCHWIDH);
+        sendMSG(targetID, "{\"proto\":\"matchWithReq\",\"targetID\":\"" + myID + "\"}");
         break;
       case "matchWithRep": // 対戦の申し込み結果
-                           // {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or
-                           // NG"}
-        if (gj.getStatus().equals("OK")) {
-          // OKの場合は両セッションにメッセージを送る
+                           // {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK/NG"}
+        if (msgToGameJson.getStatus().equals("OK")) {
+          // OKの場合は両セッションに対戦開始のメッセージを送る
           int s = new Random().nextInt(2);
           String fmt = "{\"proto\":\"matchStart\",\"targetID\":\"%s\", \"status\":\"%s\"}";
-          sendMSG(gj.getTargetID(), String.format(fmt, sessionID, s == 0 ? "First" : "Second"));
-          sendMSG(sessionID, String.format(fmt, gj.getTargetID(), s == 0 ? "Second" : "First"));
+          sendMSG(targetID, String.format(fmt, myID, s == 0 ? "First" : "Second"));
+          sendMSG(myID, String.format(fmt, targetID, s == 0 ? "Second" : "First"));
+          myGameData.setProgress(GameJSON.PROGRESS.MATCHING);
+          targetGameData.setProgress(GameJSON.PROGRESS.MATCHING);
         } else {
-          // NGの場合は申し込んだほうのセッションにのみメッセージを送る
-          sendMSG(gj.getTargetID(),
-              "{\"proto\":\"matchWithRep\",\"targetID\":\"" + sessionID + "\", \"status\":\"NG\"}");
+          // NGの場合は申し込んだほうのセッションに対戦NGを伝える
+          sendMSG(targetID,
+              "{\"proto\":\"matchWithRep\",\"targetID\":\"" + myID + "\", \"status\":\"NG\"}");
+          myGameData.setProgress(GameJSON.PROGRESS.WAIT);
         }
         break;
       default:
         break;
     }
 
-    System.out.printf("sessionID:%s message:%s %s %s\n", sessionID, message.getPayload(),
-        g.getStartDate(), gj);
+    System.out.printf("sessionID:%s message:%s %s %s\n", myID, message.getPayload(),
+        myGameData.getStartDate(), msgToGameJson);
 
   }
 

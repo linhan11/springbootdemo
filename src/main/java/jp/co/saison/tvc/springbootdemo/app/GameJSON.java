@@ -8,13 +8,25 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GameJSON {
+  enum PROGRESS {
+    WAIT, MATCHWIDH, MATCHING
+  }
   private String proto;// プロトコル種別
   private String user;
   private String login_on; // ログイン日時
   private String sessionID;// セッションID
   private String targetID; // 通信相手のセッションID
-  private String status;
+  private String status; // 各プロトコルの追加情報
   private boolean isMatch;// 対戦中の場合true
+  private PROGRESS progress;
+
+  public PROGRESS getProgress() {
+    return progress;
+  }
+
+  public void setProgress(PROGRESS progress) {
+    this.progress = progress;
+  }
 
   @JsonIgnore
   private WebSocketSession session;
@@ -52,6 +64,10 @@ public class GameJSON {
     return isMatch;
   }
 
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
   public String toString() {
     return "GameJSON [proto=" + proto + ", user=" + user + "]";
   }
@@ -77,5 +93,4 @@ public class GameJSON {
   public String getStatus() {
     return status;
   }
-
 }
