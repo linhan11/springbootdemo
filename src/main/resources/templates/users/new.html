@@ -5,10 +5,13 @@
     <title>New</title>
 <script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
 <link href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"></link>
+<link rel="stylesheet" href="/css/boxmaru.css"  th:href="@{/css/boxmaru.css}" />
+<link rel="stylesheet" href="/css/edituser.css"  th:href="@{/css/edituser.css}" />
   </head>
-  <body>
-    <div class="container">
-      <h1>New</h1>
+  <body class="bodyclass">
+
+    <div class="boxmaru">
+      <span class="box-title">アカウント登録</span>
       <form th:action="@{/users}" th:method="post">
         <div class="form-group">
           <label class="control-label">名前</label>
@@ -23,10 +26,8 @@
           <input class="form-control" type="text" name="url" />
         </div>
         <button class="btn btn-default" type="submit">作成</button>
+        <a class="btn btn-default" th:href="@{/}" href="/">戻る</a>
       </form>
-      <div class="pull-right">
-        <a class="btn btn-link" href="/">画面へ</a>
-      </div>
     </div>
   </body>
 </html>
