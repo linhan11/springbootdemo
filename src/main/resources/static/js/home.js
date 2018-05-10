@@ -1,67 +1,137 @@
 var game = {}
 
 /*
- * gridid を x, y へ変更
- */
-function convert_gridid_to_xy() {
-	switch (game.gridid) {
-	case "grid_1":
-		game.x = 0;
-		game.y = 0;
-		break;
-	case "grid_2":
-		game.x = 1;
-		game.y = 0;
-		break;
-	case "grid_3":
-		game.x = 2;
-		game.y = 0;
-		break;
-	case "grid_4":
-		game.x = 0;
-		game.y = 1;
-		break;
-	case "grid_5":
-		game.x = 1;
-		game.y = 1;
-		break;
-	case "grid_6":
-		game.x = 2;
-		game.y = 1;
-		break;
-	case "grid_7":
-		game.x = 0;
-		game.y = 2;
-		break;
-	case "grid_8":
-		game.x = 1;
-		game.y = 2;
-		break;
-	case "grid_9":
-		game.x = 2;
-		game.y = 2;
-		break;
-	}
-}
-
-
-/*
  * 判定 x x x
  *
  * y y y
  *
  * x x x
  */
-function check_map() {
+function check_xy(piece) {
+	var x = 0;
+	var y = 0;
+	var ok;
+
+	ok = piece;
+	for (x = y = 0; x < 3; x++, y++) {
+		if (game.map[y][x] != piece) {
+			ok = "";
+			break;
+		}
+	}
+	if (ok != "") {
+		return true;
+	}
+
+	ok = piece;
+	for (x = y = 2; x >= 0; x--, y--) {
+		if (game.map[y][x] != piece) {
+			ok = "";
+			break;
+		}
+	}
+	if (ok != "") {
+		return true;
+	}
+	return false;
 }
 
+function check_x(x, piece) {
+	var y;
+
+	for (y = 0; y < 3; y++) {
+		if (game.map[y][x] != piece) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function check_y(y, piece) {
+	var x;
+
+	for (x = 0; x < 3; x++) {
+		if (game.map[y][x] != piece) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function grid_to_map() {
+	var x = 0;
+	var y = 0;
+	var piece;
+
+	for (var i = 1; i <= 9; i++) {
+		piece = $("#grid_" + i).text();
+		game.map[y][x] = piece;
+		x++;
+		if ((i % 3) == 0) {
+			x = 0;
+			y++;
+		}
+	}
+}
+
+function check_map() {
+	var x = 0;
+	var y = 0;
+	var piece;
+
+	grid_to_map();
+
+	for (y = 0; y < 3; y++) {
+		piece = game.map[y][0];
+		if (piece != "") {
+			if (check_y(y, piece)) {
+				return piece;
+			}
+		}
+	}
+	for (x = 0; x < 3; x++) {
+		piece = game.map[0][x];
+		if (piece != "") {
+			if (check_x(x, piece)) {
+				return piece;
+			}
+		}
+	}
+
+	piece = game.map[0][0];
+	if (piece != "") {
+		if (check_xy(piece)) {
+			return piece;
+		}
+	}
+	piece = game.map[2][0];
+	if (piece != "") {
+		if (check_xy(piece)) {
+			return piece;
+		}
+	}
+	return "";
+}
+
+function check_win_lose() {
+	var piece;
+	if ((piece = check_map()) != "") {
+		game.winpiece = piece;
+		return true;
+	}
+	return false;
+}
+
+/*
+ * 駒を置いたときの処理
+ */
 function set_piece() {
 	if (game.status != "start") {
-		utl_set_status("開始状態ではありません");
+		utl_set_message("開始状態ではありません");
 		return;
 	}
 	if (game.piece != game.turn) {
-		utl_set_status("あいてが試行中です");
+		utl_set_message("あいてが試行中です");
 		return;
 	}
 
@@ -77,9 +147,11 @@ function set_piece() {
 	 */
 	$("#" + game.gridid).text(game.turn);
 
-	convert_gridid_to_xy();
-
 	send_play_matching();
+
+	if (check_win_lose()) {
+		console.log("win piece : " + game.winpiece);
+	}
 
 	if (game.turn == "X") {
 		game.turn = "O";
@@ -97,10 +169,19 @@ function get_loginuser() {
 	return $('#loginuser').text();
 }
 
-/* ------------------------------------------------------------------------
- * メイン
- * ---------------------------------------------------------------------- */
-$(document).ready(function() {
+function utl_set_message(msg) {
+	$("#turnstatus").text(msg);
+}
+
+function utl_turn_message() {
+	if (game.piece == game.turn) {
+		utl_set_message("あなたの番です");
+	} else {
+		utl_set_message("あいての番です");
+	}
+}
+
+function init_game() {
 	game.status = "";
 	game.userid = "";
 	game.id = "";
@@ -109,6 +190,19 @@ $(document).ready(function() {
 	game.gridid = "";
 	game.piece = "";
 	game.map = [ [ "", "", "" ], [ "", "", "" ], [ "", "", "" ] ];
+	game.winpiece = "";
+}
+
+function reset_game() {
+
+}
+
+/* ------------------------------------------------------------------------
+ * メイン
+ * ---------------------------------------------------------------------- */
+$(document).ready(function() {
+
+	init_game();
 
 	for (var i = 1; i <= 9; i++) {
 		$("#grid_" + i).click(function() {
@@ -186,6 +280,9 @@ function makeUserTable(data) {
 	console.log("makeUserTable()");
 
 	clearUsertable("userlist");
+
+	game.login_list = data.login_list;
+
 	for (var i = 0; i < data.login_list.length; i++) {
 		var button_caption;
 		var click;
@@ -211,18 +308,16 @@ function makeUserTable(data) {
 									+ '</button></td></tr>');
 		if (click) {
 			var button = document.getElementById(data.login_list[i].id);
-			button.addEventListener("click", myfunc);
+			button.addEventListener("click", function (event) {
+				console.log("session id : " + this.id);
+				var target = $(event.target);
+
+				target.text("依頼");
+				game.button = target;
+				send_play_matchWithReq(this.id);
+			});
 		}
 	}
-}
-
-function myfunc(event) {
-	console.log("session id : " + this.id);
-	var target = $(event.target);
-
-	target.text("依頼");
-	game.button = target;
-	send_play_matchWithReq(this.id);
 }
 
 /*
@@ -236,7 +331,8 @@ function recv_login_list(data) {
 }
 
 /*
- * // 対戦の申し込み {"proto":"matchWithReq","targetID":"targetSeesionID"}
+ * 対戦の申し込み
+ *  {"proto":"matchWithReq","targetID":"targetSeesionID"}
  */
 function send_play_matchWithReq(sessionid) {
 	console.log("send_play_matchWithReq()");
@@ -254,6 +350,10 @@ function send_play_matchWithReq(sessionid) {
 
 }
 
+/*
+ * 対戦申込みの返却
+ *  {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
+ */
 function send_play_matchWithRep(data, status) {
 	data.proto = "matchWithRep";
 	data.status = status;
@@ -264,11 +364,13 @@ function send_play_matchWithRep(data, status) {
 }
 
 /*
- * 対戦の申し込み結果 {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
+ * 対戦の申し込み結果の受信
+ * 　ダイアログを表示し、許可 or 拒否
+ * 　大戦中であれば　拒否 (Serverで実装）
+ *  {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
  */
 
 function recv_play_matchWithReq(data) {
-
 	console.log("recv_play_matchWithReq()");
 
 	if (game.status == "login") {
@@ -289,6 +391,10 @@ function recv_play_matchWithReq(data) {
 	}
 }
 
+/*
+ * 対戦申込みの結果
+ * 依頼した側に、対戦申込みの結果が来る（NG only）
+ */
 function recv_play_matchWithRep(data) {
 	console.log("recv_play_matchWithRep");
 	game.status = "login";
@@ -297,18 +403,10 @@ function recv_play_matchWithRep(data) {
 
 }
 
-function utl_set_status(msg) {
-	$("#turnstatus").text(msg);
-}
-
-function utl_turn_message() {
-	if (game.piece == game.turn) {
-		utl_set_status("あなたの番です");
-	} else {
-		utl_set_status("あいての番です");
-	}
-}
-
+/*
+ * 対戦の開始
+ *  駒が first か secound で決まる
+ */
 function recv_play_matchStart(data) {
 	console.log("recv_play_matchStart");
 	console.log("status : " + data.status);
@@ -348,6 +446,10 @@ function send_play_matching() {
 	ws.send(JSON.stringify(data));
 }
 
+/*
+ * 対戦中　相手から受信
+ *
+ */
 function recv_play_matching(data) {
 	console.log("recv_play_matching");
 
@@ -364,6 +466,10 @@ function recv_play_matching(data) {
 
 	// 版情報とメッセージを書き換える
 	$("#" + wsRes.gridid).text(wsRes.turn);
+
+	if (check_win_lose()) {
+		console.log("win piece : " + game.winpiece);
+	}
 
 	game.number = Number(wsRes.number);
 	game.numver++;
