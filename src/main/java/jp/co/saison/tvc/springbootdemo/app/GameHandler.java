@@ -108,11 +108,19 @@ public class GameHandler extends TextWebSocketHandler {
       case "matching": // 対戦中
                        // {"proto":"matching", "targetID":"targetID", "status":"盤データ"
                        // 盤データは置かれた順番が分かるようにしてもらえると途中セーブが不要になる
+        // 対戦中の場合は、相手にそのデータを通知だけすればよい
+        sendMSG(targetID,
+            String.format("{\"proto\":\"matching\", \"targetID\":\"%s\", \"status\":\"%s\"}", myID,
+                msgToGameJson.getStatus()));
         break;
       case "matchEnd": // 対戦終了
-                       // {"proto":"matching", "targetID":"targetID", "status":"盤データ","result":"WIN/LOOSE/SUSPEND"}
-        //対戦結果をセーブ
-        //ステータスをWAITに戻す
+                       // {"proto":"matchEnd", "targetID":"targetID",
+                       // "status":"盤データ","result":"WIN/LOOSE/SUSPEND/DRAW"}
+        // 対戦結果をセーブ
+        // ステータスをWAITに戻す
+        myGameData.setProgress(GameJSON.PROGRESS.WAIT);
+        targetGameData.setProgress(GameJSON.PROGRESS.WAIT);
+
         break;
       default:
         break;
@@ -120,7 +128,7 @@ public class GameHandler extends TextWebSocketHandler {
 
     System.out.printf("sessionID:%s message:%s %s %s\n", myID, message.getPayload(),
         myGameData.getStartDate(), msgToGameJson);
-
+    sendUserList();
   }
 
   private void sendMSG(String targetID, String msg) {
@@ -140,7 +148,7 @@ public class GameHandler extends TextWebSocketHandler {
     String sessionID = session.getId();
     gameSessionData.remove(sessionID);
 
-    //対戦中の場合は、相手ユーザに通知する
+    // 対戦中の場合は、相手ユーザに通知する
 
     // 全ての接続に対し、ログインリストの更新を通知する
     sendUserList();
