@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.CloseStatus;
@@ -18,9 +17,6 @@ public class ChatHandler extends TextWebSocketHandler {
 			new ConcurrentHashMap<>();
 
   String url = "http://localhost:8080/api/chatlog";
-
-	@Autowired
-	DemoDataService service;
 
   /***
    * おそらくconnectionが成立したときに呼び出される
