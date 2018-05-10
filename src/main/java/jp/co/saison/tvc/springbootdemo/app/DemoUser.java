@@ -1,7 +1,6 @@
 package jp.co.saison.tvc.springbootdemo.app;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -24,10 +23,13 @@ public class DemoUser {
 	private Date date;
 	@Column(name = "url")
 	private String url;
+    @Column(name = "draw")
+    private Integer draw;
 
 	protected DemoUser() {
 		this.win = 0;
 		this.lose = 0;
+		this.draw = 0;
 		this.url = "";
 		this.date = new Date();
 	}
@@ -84,5 +86,13 @@ public class DemoUser {
 	public void setUrl(String url) {
 		this.url = url;
 	}
+
+  public Integer getDraw() {
+    return draw;
+  }
+
+  public void setDraw(Integer draw) {
+    this.draw = draw;
+  }
 
 }
