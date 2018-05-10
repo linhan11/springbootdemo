@@ -18,7 +18,8 @@ public class GameJSON {
   private String sessionID;// セッションID
   private String targetID; // 通信相手のセッションID
   private String status; // 各プロトコルの追加情報
-  private String gameID; //ゲームを識別するID DB格納時のプライマリーキー
+  private String gameID; // ゲームを識別するID DB格納時のプライマリーキー
+  private String result;// 対戦結果
   private PROGRESS progress;
 
   public String getProgressString() {
@@ -98,6 +99,14 @@ public class GameJSON {
       System.out.print(e);
     }
     return gj;
+  }
+
+  public String getResult() {
+    return result;
+  }
+
+  public void setResult(String result) {
+    this.result = result;
   }
 
   public String getProto() {
