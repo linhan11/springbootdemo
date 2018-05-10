@@ -18,7 +18,11 @@
 				<th>負け</th>
 			</tr>
 			<tr th:each="user : ${users}" th:object="${user}">
-				<td th:text="${user.name}">name</td>
+				<td>
+					<img th:src="${user.url}" width="80"/> <br/>
+					<span th:text="${user.name}"></span>
+				</td>
+
 				<td th:text="${user.win}">name</td>
 				<td th:text="${user.lose}">name</td>
 			</tr>
