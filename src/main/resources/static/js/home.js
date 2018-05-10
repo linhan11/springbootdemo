@@ -1,9 +1,9 @@
 var game = {}
 
 /*
- * grind を x, y へ変更
+ * gridid を x, y へ変更
  */
-function convert_grind_to_xy() {
+function convert_gridid_to_xy() {
 	switch (game.gridid) {
 	case "grid_1":
 		game.x = 0;
@@ -77,7 +77,7 @@ function set_piece() {
 	 */
 	$("#" + game.gridid).text(game.turn);
 
-	convert_grind_to_xy();
+	convert_gridid_to_xy();
 
 	send_play_matching();
 
@@ -137,6 +137,7 @@ $(document).ready(function() {
 	};
 	ws.onmessage = function(message) {
 		try {
+			console.log("JSON.parse (1): " + message.data);
 			wsRes = JSON.parse(message.data);
 
 			console.log("onmessage()");
@@ -161,7 +162,7 @@ $(document).ready(function() {
 				recv_play_matching(wsRes);
 			}
 		} catch (e) {
-			alert(e);
+			alert("(1)" + e);
 		}
 	};
 	ws.onclose = function() {
@@ -257,6 +258,8 @@ function send_play_matchWithRep(data, status) {
 	data.proto = "matchWithRep";
 	data.status = status;
 
+	game.targetid = data.targetID;
+
 	ws.send(JSON.stringify(data));
 }
 
@@ -328,19 +331,18 @@ function recv_play_matchStart(data) {
  * 盤データは置かれた順番が分かるようにしてもらえると途中セーブが不要になる
  */
 function send_play_matching() {
-	console.log("recv_play_matchStart");
+	console.log("send_play_matching");
 	var data = {};
 
 	data.proto = "matching";
 	data.targetID = game.targetid;
 	data.user = game.userid;
-	data.status = "";
-
-	data.x = game.x;
-	data.y = game.y;
-	data.number = game.number;
-	data.turn = game.turn;
-	data.grid = game.grind;
+	game.numver++;
+	var status = {};
+	status.gridid = game.gridid;
+	status.number = game.number;
+	status.turn = game.turn;
+	data.status = JSON.stringify(JSON.stringify(status));
 
 	console.log(data);
 	ws.send(JSON.stringify(data));
@@ -349,16 +351,22 @@ function send_play_matching() {
 function recv_play_matching(data) {
 	console.log("recv_play_matching");
 
-	console.log("x       : " + data.x);
-	console.log("y       : " + data.y);
-	console.log("number  : " + data.number);
-	console.log("turn    : " + data.turn);
-	console.log("grind   : " + data.grind);
-
+	var wsRes;
+	try {
+		console.log("JSON.parse : " + data.status);
+		wsRes = JSON.parse(data.status);
+	} catch (e) {
+		alert("(2) " + e);
+	}
+	console.log("gridid  : " + wsRes.gridid);
+	console.log("number  : " + wsRes.number);
+	console.log("turn    : " + wsRes.turn);
 
 	// 版情報とメッセージを書き換える
-	$("#" + data.grind).text(data.turn);
+	$("#" + wsRes.gridid).text(wsRes.turn);
 
+	game.number = Number(wsRes.number);
+	game.numver++;
 	game.turn = game.piece;
 
 	utl_turn_message();
