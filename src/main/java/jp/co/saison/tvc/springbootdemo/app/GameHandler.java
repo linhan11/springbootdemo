@@ -3,6 +3,7 @@ package jp.co.saison.tvc.springbootdemo.app;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -22,31 +23,36 @@ public class GameHandler extends TextWebSocketHandler {
   @Override
   public void afterConnectionEstablished(WebSocketSession session) {
     String userID = session.getUri().getQuery();
-    String sessionID = session.getId();
-    GameJSON g = new GameJSON(userID, sessionID, session);
+    String myID = session.getId();
+    GameJSON myGameData = new GameJSON(userID, myID, session);
 
     // 今回のセッションをセッションプールに追加
-    gameSessionData.put(sessionID, g);
+    gameSessionData.put(myID, myGameData);
 
-    // 全セッションの情報を各ユーザに通知
+    // 全ての接続に対し、ログインリストの更新を通知する
+    sendUserList();
+
+    System.out.printf("login user:%s id:%s\n", userID, myID);
+  }
+
+  private void sendUserList() {
+    // 全セッションの情報をユーザリストに作成
     List<String> userList = new ArrayList<>();
     gameSessionData.forEach((key, value) -> {
-      userList.add(String.format("{\"user\":\"%s\",\"status\":\"%s\", \"login_on\":\"%s\",\"id\":\"%s\"}",
-          value.getUser(), value.isMtach() == true ? "対戦中" : "待機中", value.getStartDate(), value.getSessionID()));
+      userList.add(
+          String.format("{\"user\":\"%s\",\"status\":\"%s\", \"login_on\":\"%s\",\"id\":\"%s\"}",
+              value.getUser(), value.getProgressString(), value.getStartDate(), value.getSessionID()));
     });
-    String msg = "{\"proto\":\"login_list\",\"login_list\":[" + String.join(",", userList) + "]}";
+    String fmt = "{\"proto\":\"login_list\",\"id\":\"%s\", \"login_list\":["
+        + String.join(",", userList) + "]}";
 
-    TextMessage message = new TextMessage(msg.getBytes());
+    // 全ての接続に対し、ログインリストの更新を通知する
     gameSessionData.forEach((key, value) -> {
-      try {
-        value.getSession().sendMessage(message);
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+      String msg = String.format(fmt, key);
+      sendMSG(key, msg);
+      System.out.printf("msg=%s\n", msg);
     });
 
-    System.out.printf("GameHandler:%s %s msg=%s\n", userID, sessionID, msg);
   }
 
   /***
@@ -54,20 +60,63 @@ public class GameHandler extends TextWebSocketHandler {
    */
   @Override
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-    String sessionID = session.getId();
-    GameJSON g = gameSessionData.get(sessionID);
-    /*
-     * やり取りしたメッセージをDBへ保持
-     *
-     * メッセージ形式 セッションID 識別子に利用 ユーザでわかるか？ ログインユーザ メッセージ
-     *
-     * TODO: ログインユーザ名を取得
-     */
+    String myID = session.getId();
+    GameJSON myGameData = gameSessionData.get(myID);
+    GameJSON targetGameData = null;
+    GameJSON msgToGameJson = GameJSON.getInstanceFromJSON(message.getPayload());
+    String targetID = msgToGameJson.getTargetID();
 
-    GameJSON gj = GameJSON.getInstanceFromJSON(message.getPayload());
+    if (targetID != null && targetID.isEmpty() == false) {
+      targetGameData = gameSessionData.get(targetID);
+    }
 
-    System.out.printf("sessionID:%s message:%s %s %s\n", sessionID, message.getPayload(),
-        g.getStartDate(), gj);
+    switch (msgToGameJson.getProto()) {
+      case "matchWithReq": // 対戦の申し込み {"proto":"matchWithReq","targetID":"targetSeesionID"}
+
+        // 対戦待ちもしくは対戦中の場合は申し込みを却下
+        if (targetGameData.getProgress() == GameJSON.PROGRESS.MATCHWIDH
+            || targetGameData.getProgress() == GameJSON.PROGRESS.MATCHING) {
+          sendMSG(myID, "{\"proto\":\"matchWithRep\",\"targetID\":\"" + msgToGameJson.getTargetID()
+              + "\", \"status\":\"NG\"}");
+          return;
+        }
+        // 自分の状態遷移を対戦申込み中に変更し対戦相手に申し込みを行う
+        myGameData.setProgress(GameJSON.PROGRESS.MATCHWIDH);
+        sendMSG(targetID, "{\"proto\":\"matchWithReq\",\"targetID\":\"" + myID + "\"}");
+        break;
+      case "matchWithRep": // 対戦の申し込み結果
+                           // {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK/NG"}
+        // OKの場合は両セッションに対戦開始のメッセージを送る
+        if (msgToGameJson.getStatus().equals("OK")) {
+          int s = new Random().nextInt(2);
+          String fmt = "{\"proto\":\"matchStart\",\"targetID\":\"%s\", \"status\":\"%s\"}";
+          sendMSG(targetID, String.format(fmt, myID, s == 0 ? "First" : "Second"));
+          sendMSG(myID, String.format(fmt, targetID, s == 0 ? "Second" : "First"));
+          myGameData.setProgress(GameJSON.PROGRESS.MATCHING);
+          targetGameData.setProgress(GameJSON.PROGRESS.MATCHING);
+        } else {
+          // NGの場合は自分は対戦待ちに戻し、申し込んだほうのセッションに対戦NGを伝える
+          sendMSG(targetID,
+              "{\"proto\":\"matchWithRep\",\"targetID\":\"" + myID + "\", \"status\":\"NG\"}");
+          myGameData.setProgress(GameJSON.PROGRESS.WAIT);
+        }
+        break;
+      default:
+        break;
+    }
+
+    System.out.printf("sessionID:%s message:%s %s %s\n", myID, message.getPayload(),
+        myGameData.getStartDate(), msgToGameJson);
+
+  }
+
+  private void sendMSG(String targetID, String msg) {
+    try {
+      gameSessionData.get(targetID).getSession().sendMessage(new TextMessage(msg.getBytes()));
+    } catch (IOException e) {
+      // クライアント側は既に切れているのでサーバ側は今はスタックトーレスのみ出しておく
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -77,6 +126,10 @@ public class GameHandler extends TextWebSocketHandler {
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     String sessionID = session.getId();
     gameSessionData.remove(sessionID);
+
+    // 全ての接続に対し、ログインリストの更新を通知する
+    sendUserList();
+
     System.out.printf("session close sessionID:%s\n", sessionID);
   }
 

@@ -104,9 +104,19 @@ $(document).ready(function() {
 	ws.onmessage = function(message) {
 		try {
 			wsRes = JSON.parse(message.data);
+			console.log("onmessage()");
+			console.log("proto : " + wsRes.proto);
+
 			if (wsRes.proto == "login_list") {
 				//alert(wsRes);
 				makeUserTable(wsRes);
+			} else if (wsRes.proto == "matchWithReq") {
+				// 対戦の申し込み
+				console.log(wsRes);
+				recv_play_approach(wsRes);
+			} else if (wsRes.proto == "matchWithRep") {
+				// 対戦の申し込み結果
+				console.log(wsRes);
 			} else {
 				alert(wsRes.proto);
 			}
@@ -121,6 +131,27 @@ $(document).ready(function() {
 	};
 
 })
+
+/*
+ * // 対戦の申し込み {"proto":"matchWithReq","targetID":"targetSeesionID"}
+ */
+function send_play_approach(sessionid) {
+	console.log("send_play_approach()");
+	var data = {};
+	data.proto = "matchWithReq";
+	data.targetID = sessionid;
+	console.log(data);
+	ws.send(JSON.stringify(data));
+
+}
+
+/*
+ * 対戦の申し込み結果 {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
+ */
+function recv_play_approach(data) {
+	$('#turnstatus').text(data.targetID);
+}
+
 
 function clearUsertable(name) {
 	$("#userlist").empty();
@@ -145,40 +176,16 @@ function makeUserTable(data) {
 								+ '</td><td><button id="'
 								+ data.login_list[i].id
 								+ '" class="game-play btn btn-danger">対戦</button></td></tr>')
+		var button = document.getElementById(data.login_list[i].id);
+		button.addEventListener("click",myfunc);
 	}
-	$("#UserTable").on("click", ".game-play", function() {
-		console.log("session id : " + this.id);
-	});
-	/*
-	var rows=[];
-	var table = document.createElement("table");
+}
 
-	clearUsertable("UserTable");
-
-	table.border = 2;
-	table.createCaption().innerHTML="対戦相手一覧";
-
-	rows.push(table.insertRow(-1));//行の追加
-	var title = ["ユーザ名", "ログイン日時", "ステータス"];
-	for ( i = 0; i < title.length; i++ ){
-	cell=rows[0].insertCell(-1);
-	cell.appendChild(document.createTextNode(title[i]));
-	cell.style.backgroundColor = "#bbb"
-	}
-
-	for (i = 0; i < data.login_list.length; i++ ){
-	rows.push(table.insertRow(-1));//行の追加
-	cell=rows[i+1].insertCell(-1);
-	cell.appendChild(document.createTextNode(data.login_list[i].user));
-
-	cell=rows[i+1].insertCell(-1);
-	cell.appendChild(document.createTextNode(data.login_list[i].login_on));
-
-	cell=rows[i+1].insertCell(-1);
-	cell.appendChild(document.createTextNode(data.login_list[i].status));
-	}
-	document.getElementById("UserTable").appendChild(table);
-	 */
+function myfunc(event) {
+	console.log("session id : " + this.id);
+	var target = $(event.target);
+	target.text("依頼");
+	send_play_approach(this.id);
 }
 
 
