@@ -8,7 +8,9 @@
 <link rel="stylesheet" href="/css/profile.css" th:href="@{/css/profile.css}" />
 <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
 <link rel="stylesheet" href="/css/boxmaru.css" th:href="@{/css/boxmaru.css}" />
+<link rel="stylesheet" href="/css/jquery-ui.css" th:href="@{/css/jquery-ui.css}">
 <script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+<script src="/js/jquery-ui.min.js" th:src="@{/js/jquery-ui.min.js}"></script>
 <script src="/js/home.js" th:src="@{/js/home.js}"></script>
 
 </head>
@@ -43,6 +45,9 @@
 	<div class="contents">
 		<div class="span1">
 			<div class="boxmarub">
+			<div id="show_dialog" title="title" style="display:none;">
+			<p>対戦の申し込みが来ています</p>
+			</div>
 				<span class="box-title">まるぺけ対戦</span>
 				<div class="span3" style="background: #fff; height: 300px;">
 
