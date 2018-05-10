@@ -18,6 +18,7 @@ public class GameJSON {
   private String sessionID;// セッションID
   private String targetID; // 通信相手のセッションID
   private String status; // 各プロトコルの追加情報
+  private String gameID; //ゲームを識別するID DB格納時のプライマリーキー
   private PROGRESS progress;
 
   public String getProgressString() {
@@ -30,6 +31,14 @@ public class GameJSON {
         return "対戦中";
     }
     return "不明";
+  }
+
+  public String getGameID() {
+    return gameID;
+  }
+
+  public void setGameID(String gameID) {
+    this.gameID = gameID;
   }
 
   public PROGRESS getProgress() {
