@@ -21,6 +21,15 @@ public class GameJSON {
   private String gameID; // ゲームを識別するID DB格納時のプライマリーキー
   private String result;// 対戦結果
   private PROGRESS progress;
+  private boolean isFirst; //先攻ならture
+
+  public boolean isFirst() {
+    return isFirst;
+  }
+
+  public void setFirst(boolean isFirst) {
+    this.isFirst = isFirst;
+  }
 
   public String getProgressString() {
     switch (progress) {

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -17,6 +18,11 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Component
 public class GameHandler extends TextWebSocketHandler {
   private ConcurrentHashMap<String, GameJSON> gameSessionData = new ConcurrentHashMap<>();
+
+  @Autowired
+  GameDataService serviceGame;
+  @Autowired
+  DemoUserService serviceUser;
 
   /***
    * おそらくconnectionが成立したときに呼び出される
@@ -96,8 +102,10 @@ public class GameHandler extends TextWebSocketHandler {
           String gameID = UUID.randomUUID().toString();
           myGameData.setProgress(GameJSON.PROGRESS.MATCHING);
           myGameData.setGameID(gameID);
+          myGameData.setFirst(s == 0 ? true : false);
           targetGameData.setProgress(GameJSON.PROGRESS.MATCHING);
           targetGameData.setGameID(gameID);
+          targetGameData.setFirst(s == 0 ? true : false);
         } else {
           // NGの場合は自分は対戦待ちに戻し、申し込んだほうのセッションに対戦NGを伝える
           sendMSG(targetID,
@@ -115,8 +123,34 @@ public class GameHandler extends TextWebSocketHandler {
         break;
       case "matchEnd": // 対戦終了
                        // {"proto":"matchEnd", "targetID":"targetID",
-                       // "status":"盤データ","result":"WIN/LOOSE/SUSPEND/DRAW"}
+                       // "status":"盤データ","result":"WIN/LOSE/SUSPEND/DRAW"}
+
         // 対戦結果をセーブ
+        String first = myGameData.isFirst() ? myID : targetID;
+        String second = myGameData.isFirst() ? targetID : myID;
+        serviceGame.save(myGameData.getGameID(), first, second, myGameData.getResult(),
+            myGameData.getStatus());
+
+        // それぞれのユーザの対戦成績を反映
+        DemoUser user1st = serviceUser.findOne(first);
+        DemoUser user2nd = serviceUser.findOne(second);
+        switch (myGameData.getResult()) {
+          case "WIN":
+            user1st.setWin(user1st.getWin() + 1);
+            user2nd.setLose(user2nd.getLose() + 1);
+            break;
+          case "LOSE":
+            user1st.setLose(user1st.getLose() + 1);
+            user2nd.setWin(user2nd.getWin() + 1);
+            break;
+          case "DRAW":
+            user1st.setDraw(user1st.getDraw() + 1);
+            user2nd.setDraw(user2nd.getDraw() + 1);
+            break;
+        }
+        serviceUser.save(user1st);
+        serviceUser.save(user2nd);
+
         // ステータスをWAITに戻す
         myGameData.setProgress(GameJSON.PROGRESS.WAIT);
         targetGameData.setProgress(GameJSON.PROGRESS.WAIT);
