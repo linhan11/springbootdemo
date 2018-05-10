@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -15,6 +16,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class ChatHandler extends TextWebSocketHandler {
   private ConcurrentHashMap<String, Set<WebSocketSession>> roomSessionPool =
 			new ConcurrentHashMap<>();
+
+  String url = "http://localhost:8080/api/chatlog";
+
 	@Autowired
 	DemoDataService service;
 
@@ -53,8 +57,16 @@ public class ChatHandler extends TextWebSocketHandler {
      */
      for (WebSocketSession roomSession : roomSessionPool.get(roomName)) {
       roomSession.sendMessage(message);
-      System.out.printf("%s:%s:%s(%s)\n", session.toString(), "unknown", message.getPayload().toString(), message.getPayload());
-      service.save(session.toString(), "unknown", message.getPayload().toString());
+      //System.out.printf("%s:%s:%s(%s)\n", session.toString(), "unknown", message.getPayload().toString(), message.getPayload());
+
+      DemoData demoData = new DemoData();
+      demoData.setSession(session.toString());
+      demoData.setName("unknown");
+      demoData.setMessage(message.getPayload());
+
+      RestTemplate restTemplate = new RestTemplate();
+      restTemplate.postForEntity(url, demoData, DemoData.class);
+
     }
   }
 

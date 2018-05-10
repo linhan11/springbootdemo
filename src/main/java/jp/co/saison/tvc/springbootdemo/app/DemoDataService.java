@@ -30,7 +30,7 @@ public class DemoDataService {
 		data.setSession(session);
 		data.setName(name);
 		data.setMessage(message);
-        return repository.save(data);
+        return save(data);
 	}
 
     public DemoData save(DemoData data) {
