@@ -216,6 +216,14 @@ function send_play_matchWithReq(sessionid) {
 
 }
 
+function send_play_matchWithRep(data, status) {
+
+	data.proto = "matchWithRep";
+	data.status = status;
+
+	ws.send(JSON.stringify(data));
+}
+
 /*
  * 対戦の申し込み結果 {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
  */
@@ -224,10 +232,6 @@ function recv_play_matchWithReq(data) {
 
 	console.log("recv_play_matchWithReq()");
 
-	var data = {};
-
-	data.targetID = game.id;
-	data.proto = "matchWithRep";
 	if (game.status == "login") {
 		$("#show_dialog").dialog({
 			modal : true,
@@ -235,24 +239,15 @@ function recv_play_matchWithReq(data) {
 			buttons : {
 				"OK" : function() {
 					$(this).dialog("close");
-					data.status = "OK";
-					game.status = "start";
+					send_play_matchWithRep(data, "OK");
 				},
 				"キャンセル" : function() {
 					$(this).dialog("close");
-					data.status = "NG";
+					send_play_matchWithRep(data, "NG");
 				}
 			}
 		});
-
-	} else {
-		data.status = "NG";
 	}
-	data.user = game.userid;
-
-	console.log(data);
-
-	ws.send(JSON.stringify(data));
 }
 
 function recv_play_matchWithRep(data) {
