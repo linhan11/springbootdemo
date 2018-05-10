@@ -29,7 +29,14 @@ public class GameHandler extends TextWebSocketHandler {
     // 今回のセッションをセッションプールに追加
     gameSessionData.put(sessionID, g);
 
-    // 全セッションの情報をユーザリストとして組み立てる
+    // 全ての接続に対し、ログインリストの更新を通知する
+    sendUserList();
+
+    System.out.printf("login user:%s id:%s\n", userID, sessionID);
+  }
+
+  private void sendUserList() {
+    // 全セッションの情報をユーザリストに作成
     List<String> userList = new ArrayList<>();
     gameSessionData.forEach((key, value) -> {
       userList.add(String.format(
@@ -38,10 +45,11 @@ public class GameHandler extends TextWebSocketHandler {
     });
     String msg = "{\"proto\":\"login_list\",\"login_list\":[" + String.join(",", userList) + "]}";
 
-    //全ての接続に対し、ログインリストの更新を通知する
-    gameSessionData.forEach((key, value) -> {sendMSG(value.getSessionID(), msg);});
+    // 全ての接続に対し、ログインリストの更新を通知する
+    gameSessionData.forEach((key, value) -> {sendMSG(key, msg);});
 
-    System.out.printf("GameHandler:%s %s msg=%s\n", userID, sessionID, msg);
+    System.out.printf("msg=%s\n", msg);
+
   }
 
   /***
@@ -56,19 +64,24 @@ public class GameHandler extends TextWebSocketHandler {
 
     switch (gj.getProto()) {
       case "matchWithReq": // 対戦の申し込み {"proto":"matchWithReq","targetID":"targetSeesionID"}
-        sendMSG(gj.getTargetID(), "{\"proto\":\"matchWithReq\",\"targetID\":\"" + sessionID + "\"}");
+        sendMSG(gj.getTargetID(),
+            "{\"proto\":\"matchWithReq\",\"targetID\":\"" + sessionID + "\"}");
         break;
-      case "matchWithRep": // 対戦の申し込み結果 {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
-        if ( gj.getStatus().equals("OK")) {
-          //OKの場合は両セッションにメッセージを送る
+      case "matchWithRep": // 対戦の申し込み結果
+                           // {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or
+                           // NG"}
+        if (gj.getStatus().equals("OK")) {
+          // OKの場合は両セッションにメッセージを送る
           int s = new Random().nextInt(2);
           String fmt = "{\"proto\":\"matchStart\",\"targetID\":\"%s\", \"status\":\"%s\"}";
-          sendMSG(gj.getTargetID(), String.format(fmt, sessionID, s==0?"First":"Second"));
-          sendMSG(sessionID, String.format(fmt, gj.getTargetID(), s==0?"Second":"First"));
+          sendMSG(gj.getTargetID(), String.format(fmt, sessionID, s == 0 ? "First" : "Second"));
+          sendMSG(sessionID, String.format(fmt, gj.getTargetID(), s == 0 ? "Second" : "First"));
         } else {
-          //NGの場合は申し込んだほうのセッションにのみメッセージを送る
-          sendMSG(gj.getTargetID(), "{\"proto\":\"matchWithRep\",\"targetID\":\"" + sessionID + "\", \"status\":\"NG\"}");
+          // NGの場合は申し込んだほうのセッションにのみメッセージを送る
+          sendMSG(gj.getTargetID(),
+              "{\"proto\":\"matchWithRep\",\"targetID\":\"" + sessionID + "\", \"status\":\"NG\"}");
         }
+        break;
       default:
         break;
     }
@@ -82,6 +95,7 @@ public class GameHandler extends TextWebSocketHandler {
     try {
       gameSessionData.get(targetID).getSession().sendMessage(new TextMessage(msg.getBytes()));
     } catch (IOException e) {
+      // クライアント側は既に切れているのでサーバ側は今はスタックトーレスのみ出しておく
       e.printStackTrace();
     }
   }
@@ -93,6 +107,10 @@ public class GameHandler extends TextWebSocketHandler {
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     String sessionID = session.getId();
     gameSessionData.remove(sessionID);
+
+    // 全ての接続に対し、ログインリストの更新を通知する
+    sendUserList();
+
     System.out.printf("session close sessionID:%s\n", sessionID);
   }
 

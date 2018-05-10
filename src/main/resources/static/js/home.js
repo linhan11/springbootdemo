@@ -176,13 +176,16 @@ function makeUserTable(data) {
 								+ '</td><td><button id="'
 								+ data.login_list[i].id
 								+ '" class="game-play btn btn-danger">対戦</button></td></tr>')
+		var button = document.getElementById(data.login_list[i].id);
+		button.addEventListener("click",myfunc);
 	}
-	$("#UserTable").on("click", ".game-play", function(event) {
-		console.log("session id : " + this.id);
-		var target = $(event.target);
-		target.text("依頼");
-		send_play_approach(this.id);
-	});
+}
+
+function myfunc(event) {
+	console.log("session id : " + this.id);
+	var target = $(event.target);
+	target.text("依頼");
+	send_play_approach(this.id);
 }
 
 
