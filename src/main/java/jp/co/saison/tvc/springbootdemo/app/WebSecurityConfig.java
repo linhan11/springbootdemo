@@ -1,5 +1,6 @@
 package jp.co.saison.tvc.springbootdemo.app;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -26,7 +28,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/css/**", "/js/**", "/users/**", "/img/**").permitAll()
+                .antMatchers("/css/**", "/js/**", "/users/**", "/img/**", "/api/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
@@ -40,6 +42,31 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	            .invalidateHttpSession(true)
 	            .deleteCookies("JSESSIONID")
                 .permitAll();
+
+        /**
+         * CSRF適用URL判断クラス
+         */
+
+        RequestMatcher csrfRequestMatcher = new RequestMatcher() {
+
+            private AntPathRequestMatcher disabledRequestMatcher =
+                    new AntPathRequestMatcher("/api/**");
+
+            @Override
+            public boolean matches(HttpServletRequest request) {
+
+                // GETならCSRFのチェックはしない
+                if("GET".equals(request.getMethod())) {
+                    return false;
+                }
+
+                // 特定のURLに該当する場合、CSRFチェックしない
+                return !disabledRequestMatcher.matches(request);
+            }
+
+        };
+        http.csrf().requireCsrfProtectionMatcher(csrfRequestMatcher);
+
     }
 /*
     @Bean
