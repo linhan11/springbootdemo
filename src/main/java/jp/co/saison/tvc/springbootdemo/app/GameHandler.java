@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -118,7 +119,7 @@ public class GameHandler extends TextWebSocketHandler {
                        // 盤データは置かれた順番が分かるようにしてもらえると途中セーブが不要になる
         // 対戦中の場合は、相手にそのデータを通知だけすればよい
         sendMSG(targetID,
-            String.format("{\"proto\":\"matching\", \"targetID\":\"%s\", \"status\":\"%s\"}", myID,
+            String.format("{\"proto\":\"matching\", \"targetID\":\"%s\", \"status\":%s}", myID,
                 msgToGameJson.getStatus()));
         break;
       case "matchEnd": // 対戦終了
