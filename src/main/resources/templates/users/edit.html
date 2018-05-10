@@ -34,6 +34,10 @@
         	<label class="control-label">負け</label>
         	<p th:number="*{lose}" />
         </div>
+        <div class="form-group">
+        	<label class="control-label">分け</label>
+        	<p th:number="*{draw}" />
+        </div>
         <div class="buttons">
         	<button class="btn btn-default" type="submit">更新</button>
         	<a class="btn btn-default" th:href="@{/}"  href="/">戻る</a>

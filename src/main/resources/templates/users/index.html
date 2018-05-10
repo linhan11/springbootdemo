@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"></link>
 <link rel="stylesheet" href="/css/boxmaru.css" th:href="@{/css/boxmaru.css}" />
 </head>
-<body class="bodyclass">
+<body class="bodyclass" style="width:360px;">
 	<div class="boxmaru">
 		<span class="box-title">ユーザ一覧</span>
 		<table class="sortable" id="foo">
@@ -16,6 +16,7 @@
 				<th>名前</th>
 				<th>勝ち</th>
 				<th>負け</th>
+				<th>分け</th>
 			</tr>
 			<tr th:each="user : ${users}" th:object="${user}">
 				<td>
@@ -25,6 +26,7 @@
 
 				<td th:text="${user.win}">name</td>
 				<td th:text="${user.lose}">name</td>
+				<td th:text="${user.draw}">name</td>
 			</tr>
 		</table>
 		<div class="buttons">
