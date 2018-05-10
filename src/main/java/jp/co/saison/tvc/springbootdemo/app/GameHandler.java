@@ -115,10 +115,10 @@ public class GameHandler extends TextWebSocketHandler {
         break;
       case "matching": // 対戦中
                        // {"proto":"matching", "targetID":"targetID", "status":"盤データ"
-                       // 盤データは置かれた順番が分かるようにしてもらえると途中セーブが不要になる
-        // 対戦中の場合は、相手にそのデータを通知だけすればよい
+                       // 盤データは9マスの数字がおかれた順に格納される(最大9桁)
+        // 相手に盤データを通知
         sendMSG(targetID,
-            String.format("{\"proto\":\"matching\", \"targetID\":\"%s\", \"status\":\"%s\"}", myID,
+            String.format("{\"proto\":\"matching\", \"targetID\":\"%s\", \"status\":%s}", myID,
                 msgToGameJson.getStatus()));
         break;
       case "matchEnd": // 対戦終了
@@ -180,9 +180,11 @@ public class GameHandler extends TextWebSocketHandler {
   @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     String sessionID = session.getId();
+
+    //クローズされたセッションをデータプールから取り除く
     gameSessionData.remove(sessionID);
 
-    // 対戦中の場合は、相手ユーザに通知する
+    // TODO:対戦中の場合は、相手ユーザに通知する
 
     // 全ての接続に対し、ログインリストの更新を通知する
     sendUserList();
