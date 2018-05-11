@@ -129,34 +129,31 @@ public class GameHandler extends TextWebSocketHandler {
         String first = myGameData.isFirst() ? myGameData.getUser() : targetGameData.getUser();
         String second = myGameData.isFirst() ? targetGameData.getUser() : myGameData.getUser();
 
-        System.out.printf("id:%s result:%s statis:%s\n",
-            myGameData.getGameID()==null?"null":myGameData.getGameID(),
-            msgToGameJson.getResult() == null?"null":msgToGameJson.getResult(),
-                msgToGameJson.getStatus() == null ? "null": msgToGameJson.getStatus()  );
-        System.out.println(serviceGame);
-
         serviceGame.save(myGameData.getGameID(), first, second, msgToGameJson.getResult(),
             msgToGameJson.getStatus());
 
         // それぞれのユーザの対戦成績を反映
         DemoUser user1st = serviceUser.findOne(first);
         DemoUser user2nd = serviceUser.findOne(second);
+
+        System.out.println(user1st);
+        System.out.println(user2nd);
         switch (msgToGameJson.getResult()) {
           case "WIN":
-            user1st.setWin(user1st.getWin() + 1);
-            user2nd.setLose(user2nd.getLose() + 1);
+            user1st.addWin();
+            user2nd.addLose();
             break;
           case "LOSE":
-            user1st.setLose(user1st.getLose() + 1);
-            user2nd.setWin(user2nd.getWin() + 1);
+            user1st.addLose();
+            user2nd.addWin();
             break;
           case "DRAW":
-            user1st.setDraw(user1st.getDraw() + 1);
-            user2nd.setDraw(user2nd.getDraw() + 1);
+            user1st.addDraw();
+            user2nd.addDraw();
             break;
         }
-        serviceUser.save(user1st);
-        serviceUser.save(user2nd);
+        serviceUser.update(user1st);
+        serviceUser.update(user2nd);
 
         // ステータスをWAITに戻す
         myGameData.setProgress(GameJSON.PROGRESS.WAIT);
