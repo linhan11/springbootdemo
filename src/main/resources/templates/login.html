@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
     <head>
-        <title>ここにゲーム名のログインページ </title>
+        <title>まるぺけのログインページ </title>
         <script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
         <link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"></link>
         <link rel="stylesheet" href="/css/bootstrap-theme.min.css" th:href="@{/css/bootstrap-theme.min.css}"/>
@@ -20,7 +20,7 @@
         <div class = "container">
 			<div class="wrapper">
 				<form action="#" th:action="@{/login}" method="post">
-				    <h3 class="form-signin-heading">ここにゲーム名を出す(例：9マス将棋)</h3>
+				    <h3 class="form-signin-heading">まるぺけ</h3>
 					  <hr class="colorgraph"><br>
 
 					  <input type="text" class="form-control" name="username" placeholder="username" required="" autofocus="" />
@@ -30,6 +30,6 @@
 				</form>
 			</div>
 		</div>
-		<a href="/users/new">ログインユーザを作成する</a>
+		<a href="/users/new">アカウントを作成する</a>
     </body>
 </html>
