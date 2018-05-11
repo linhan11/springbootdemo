@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DemoUserRepository  extends JpaRepository<DemoUser, Long> {
-	//public DemoUser findByName(String name);
+	public DemoUser findByName(String name);
 	//public DemoUser findOne(String name);
 }

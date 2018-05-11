@@ -21,12 +21,9 @@ public class DemoUserService {
 	}
 
 	public DemoUser findOne(String name) {
-		for (DemoUser user : repository.findAll()) {
-			if (name.equals(user.getName())) {
-				return user;
-			}
-		}
-		return null;
+
+		return repository.findByName(name);
+
 	}
 
     public DemoUser save(DemoUser user) {

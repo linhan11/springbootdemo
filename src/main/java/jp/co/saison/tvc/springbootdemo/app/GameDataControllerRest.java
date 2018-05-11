@@ -11,26 +11,26 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/chatlog")
-public class DemoDataControllerRest {
+@RequestMapping("/api/gamedata")
+public class GameDataControllerRest {
+
 	@Autowired
-	DemoDataService demoDataService;
+	GameDataService gameDataService;
 
 	@RequestMapping(method = RequestMethod.GET)
-	public List<DemoData> getChatLogs() {
-		return demoDataService.findAll();
+	public List<GameData> getGameDatas() {
+		return gameDataService.findAll();
 	}
 
-	@RequestMapping(value="{name}", method = RequestMethod.GET)
-	public List<DemoData> getChatLogbyName(@PathVariable String name) {
-		return demoDataService.findByName(name);
+	@RequestMapping(value="{id}", method = RequestMethod.GET)
+	public List<GameData> getGameDatas(@PathVariable String id) {
+		return gameDataService.findBySession(id);
 	}
-
 
 	@RequestMapping(method = RequestMethod.POST)
-	public DemoData addChatlog(@Validated @RequestBody DemoData demoData) {
-		demoDataService.save(demoData);
-		return demoData;
+	public GameData saveGameDatar(@Validated @RequestBody GameData gameData) {
+		gameDataService.save(gameData);
+		return gameData;
 	}
 
 }
