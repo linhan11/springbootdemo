@@ -2,6 +2,8 @@ package jp.co.saison.tvc.springbootdemo.app;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -11,11 +13,17 @@ import javax.persistence.Table;
 public class GameData {
 
   @Id
+  @Column(name = "id")
   private String id;
+  @Column(name = "first")
   private String first;
+  @Column(name = "second")
   private String second;
+  @Column(name = "result")
   private String result;
+
   private String end_date;
+  @Column(name = "data")
   private String data;// 盤データ
 
   protected GameData() {

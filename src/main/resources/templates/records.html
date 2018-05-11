@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>対戦一覧</title>
+<script src="/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+<link rel="stylesheet" href="/css/show.css" th:href="@{/css/show.css}" />
+<link rel="stylesheet" href="/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}"></link>
+<link rel="stylesheet" href="/css/boxmaru.css" th:href="@{/css/boxmaru.css}" />
+</head>
+<body class="bodyclass" style="width:540px;">
+	<div class="boxmaru">
+		<span class="box-title">対戦一覧</span>
+		<table class="sortable" id="foo">
+			<tr>
+				<th>先攻</th>
+				<th>結果</th>
+				<th>後攻</th>
+				<th>対戦日時</th>
+			</tr>
+			<tr th:each="record : ${records}" th:object="${record}">
+				<td th:text="${record.first}">name</td>
+				<td>
+					<div th:switch="${record.result}">
+						<p th:case="WIN">◯―✕</p>
+						<p th:case="LOSE">✕―◯</p>
+						<p th:case="DRAW">△―△</p>
+					</div>
+				</td>
+				<td th:text="${record.second}">name</td>
+				<td th:text="${record.end_date}">name</td>
+			</tr>
+		</table>
+		<div class="buttons">
+			<a class="btn btn-default" href="/">戻る</a>
+		</div>
+	</div>
+</body>
+</html>
