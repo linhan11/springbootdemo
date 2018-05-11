@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.CloseStatus;
@@ -16,7 +17,10 @@ public class ChatHandler extends TextWebSocketHandler {
   private ConcurrentHashMap<String, Set<WebSocketSession>> roomSessionPool =
 			new ConcurrentHashMap<>();
 
-  String url = "http://localhost:8080/api/chatlog";
+	@Value("${marupeke.rest.hosturl}")
+	private String hosturl;
+
+	private String address = "api/chatlog";
 
   /***
    * おそらくconnectionが成立したときに呼び出される
@@ -61,7 +65,7 @@ public class ChatHandler extends TextWebSocketHandler {
       demoData.setMessage(message.getPayload());
 
       RestTemplate restTemplate = new RestTemplate();
-      restTemplate.postForEntity(url, demoData, DemoData.class);
+      restTemplate.postForEntity(hosturl + address, demoData, DemoData.class);
 
     }
   }

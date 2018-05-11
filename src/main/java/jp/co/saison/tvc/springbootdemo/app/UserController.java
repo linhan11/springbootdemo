@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -22,8 +23,10 @@ public class UserController {
 	@Autowired
 	DemoUserService service;
 
-	String url = "http://localhost:8080/api/users";
+	@Value("${marupeke.rest.hosturl}")
+	private String hosturl;
 
+	private String address = "api/users";
 
 	private DemoUser createUser(Principal principal) {
 		Authentication auth = (Authentication)principal;
@@ -53,7 +56,7 @@ public class UserController {
 
 		RestTemplate restTemplate = new RestTemplate();
 
-		ResponseEntity<? extends ArrayList<DemoUser>> responseEntity = restTemplate.getForEntity(url, (Class<? extends ArrayList<DemoUser>>)ArrayList.class);
+		ResponseEntity<? extends ArrayList<DemoUser>> responseEntity = restTemplate.getForEntity(hosturl + address, (Class<? extends ArrayList<DemoUser>>)ArrayList.class);
 		ArrayList<DemoUser> users = responseEntity.getBody();
 
 		model.addAttribute("users", users);
@@ -75,7 +78,7 @@ public class UserController {
 
 		String name = auth.getName();
 
-		DemoUser user = restTemplate.getForObject(url + "/" + name, DemoUser.class);
+		DemoUser user = restTemplate.getForObject(hosturl + address + "/" + name, DemoUser.class);
 
 		model.addAttribute("user", user);
 		return "users/show";
@@ -110,7 +113,7 @@ public class UserController {
 
 		RestTemplate restTemplate = new RestTemplate();
 		String name = auth.getName();
-		DemoUser user = restTemplate.getForObject(url + "/" + name, DemoUser.class);
+		DemoUser user = restTemplate.getForObject(hosturl + address + "/" + name, DemoUser.class);
 		user.setPassword("password");
         model.addAttribute("user", user);
  		return "users/edit";
@@ -124,7 +127,7 @@ public class UserController {
     public String update(@ModelAttribute DemoUser user, Model model, Principal principal) {
 		RestTemplate restTemplate = new RestTemplate();
 
-		restTemplate.postForEntity(url, user, DemoUser.class);
+		restTemplate.postForEntity(hosturl + address, user, DemoUser.class);
 
         return "redirect:/users/show";
     }
@@ -137,7 +140,7 @@ public class UserController {
     public String create(@ModelAttribute DemoUser user, Model model) {
 		RestTemplate restTemplate = new RestTemplate();
 
-		restTemplate.postForObject(url, user, DemoUser.class);
+		restTemplate.postForObject(hosturl + address, user, DemoUser.class);
 
         return "redirect:/";
     }
@@ -146,7 +149,7 @@ public class UserController {
     public String delete(@ModelAttribute DemoUser user, Model model) {
 		RestTemplate restTemplate = new RestTemplate();
 
-		restTemplate.delete(url, user);
+		restTemplate.delete(hosturl + address, user);
 
 		return "redirect:/";
     }
