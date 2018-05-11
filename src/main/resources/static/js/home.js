@@ -7,7 +7,7 @@ var game = {}
  *
  * x x x
  */
-function check_xy(piece) {
+function judge_xy(piece) {
 	var x = 0;
 	var y = 0;
 	var ok;
@@ -35,7 +35,7 @@ function check_xy(piece) {
 	return false;
 }
 
-function check_x(x, piece) {
+function judge_x(x, piece) {
 	var y;
 
 	for (y = 0; y < 3; y++) {
@@ -46,7 +46,7 @@ function check_x(x, piece) {
 	return true;
 }
 
-function check_y(y, piece) {
+function judge_y(y, piece) {
 	var x;
 
 	for (x = 0; x < 3; x++) {
@@ -73,7 +73,7 @@ function grid_to_map() {
 	}
 }
 
-function check_map() {
+function judge_map() {
 	var x = 0;
 	var y = 0;
 	var piece;
@@ -84,7 +84,7 @@ function check_map() {
 	for (y = 0; y < 3; y++) {
 		piece = game.map[y][0];
 		if (piece != "") {
-			if (check_y(y, piece)) {
+			if (judge_y(y, piece)) {
 				return piece;
 			}
 		}
@@ -92,7 +92,7 @@ function check_map() {
 	for (x = 0; x < 3; x++) {
 		piece = game.map[0][x];
 		if (piece != "") {
-			if (check_x(x, piece)) {
+			if (judge_x(x, piece)) {
 				return piece;
 			}
 		}
@@ -100,13 +100,13 @@ function check_map() {
 
 	piece = game.map[0][0];
 	if (piece != "") {
-		if (check_xy(piece)) {
+		if (judge_xy(piece)) {
 			return piece;
 		}
 	}
 	piece = game.map[2][0];
 	if (piece != "") {
-		if (check_xy(piece)) {
+		if (judge_xy(piece)) {
 			return piece;
 		}
 	}
@@ -123,13 +123,22 @@ function check_map() {
 	return "-";
 }
 
-function check_win_lose() {
+function judge_win_lose() {
 	var piece;
-	if ((piece = check_map()) != "") {
+	if ((piece = judge_map()) != "") {
 		game.winpiece = piece;
 		return true;
 	}
 	return false;
+}
+
+function html_set_piece(piece) {
+	$("#" + piece.gridid).text(piece.turn);
+	if (piece.turn == "O") {
+		$("#" + piece.gridid).addClass("marupeke-o");
+	} else {
+		$("#" + piece.gridid).addClass("marupeke-x");
+	}
 }
 
 /*
@@ -155,11 +164,14 @@ function set_piece() {
 	 * 駒を置けた
 	 * Serverへmessageを送る
 	 */
-	$("#" + game.gridid).text(game.turn);
+	var piece = {};
+	piece.turn = game.turn;
+	piece.gridid = game.gridid;
+	html_set_piece(piece);
 
 	send_play_matching();
 
-	if (check_win_lose()) {
+	if (judge_win_lose()) {
 		console.log("win piece : " + game.winpiece);
 		utl_win_lose_message();
 		show_game_end_dialog();
@@ -230,6 +242,8 @@ function reset_game() {
 
 	for (var i = 1; i <= 9; i++) {
 		$("#grid_" + i).text("");
+		$("#grid_" + i).removeClass("marupeke-o");
+		$("#grid_" + i).removeClass("marupeke-x");
 	}
 
 	utl_set_message("");
@@ -323,6 +337,7 @@ function makeUserTable(data) {
 
 	for (var i = 0; i < data.login_list.length; i++) {
 		var button_caption;
+		var button_style;
 		var click;
 		if (game.id == data.login_list[i].id) {
 			button_caption = '-----';
@@ -331,19 +346,24 @@ function makeUserTable(data) {
 			button_caption = data.login_list[i].status;
 			click = true;
 		}
+		if (button_caption == "-----") {
+			button_style = "btn-default";
+		} else if (button_caption == "対戦中") {
+			button_style = "btn-danger";
+		} else {
+			button_style = "btn-success";
+		}
 		$("#UserTable")
 				.append(
 						'<tr><td>'
 								+ data.login_list[i].user
 								+ '</td><td>'
 								+ data.login_list[i].login_on
-								+ '</td><td>'
-								+ data.login_list[i].status
 								+ '</td><td><button id="'
-									+ data.login_list[i].id
-									+ '" class="game-play btn btn-danger">'
-									+ button_caption
-									+ '</button></td></tr>');
+								+ data.login_list[i].id
+								+ '" class="game-play btn ' + button_style + '">'
+								+ button_caption
+								+ '</button></td></tr>');
 		if (click) {
 			var button = document.getElementById(data.login_list[i].id);
 			button.addEventListener("click", function (event) {
@@ -419,8 +439,8 @@ function get_target_user(targetid) {
 	return "";
 }
 
-function show_dialog(data) {
-	console.log("show_dialog()");
+function show_request_dialog(data) {
+	console.log("show_request_dialog()");
 
 	game.target_user = get_target_user(data.targetID);
 
@@ -448,7 +468,7 @@ function show_game_end_dialog() {
 	$("#show_dialog").html(game.message);
 	$("#show_dialog").dialog({
 		modal : true,
-		title : game.targetid + "と対戦結果",
+		title : game.target_user + "と対戦結果",
 		buttons : {
 			"OK" : function() {
 				$(this).dialog("close");
@@ -469,7 +489,7 @@ function recv_play_matchWithReq(data) {
 
 	if (game.status == "login") {
 
-		show_dialog(data);
+		show_request_dialog(data);
 	}
 }
 
@@ -549,9 +569,12 @@ function recv_play_matching(data) {
 	console.log("turn    : " + wsRes.turn);
 
 	// 版情報とメッセージを書き換える
-	$("#" + wsRes.gridid).text(wsRes.turn);
+	var piece = {};
+	piece.turn = wsRes.turn;
+	piece.gridid = wsRes.gridid;
+	html_set_piece(piece);
 
-	if (check_win_lose()) {
+	if (judge_win_lose()) {
 		console.log("win piece : " + game.winpiece);
 		send_play_matchEnd(data);
 		return;
