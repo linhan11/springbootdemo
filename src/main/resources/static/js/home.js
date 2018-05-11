@@ -24,13 +24,12 @@ function check_xy(piece) {
 	}
 
 	ok = piece;
-	for (x = y = 2; x >= 0; x--, y--) {
+	for (x = 0, y = 2; x < 3; x++, y--) {
 		if (game.map[y][x] != piece) {
 			ok = "";
 			break;
 		}
-	}
-	if (ok != "") {
+	}	if (ok != "") {
 		return true;
 	}
 	return false;
@@ -188,6 +187,7 @@ function utl_set_message(msg) {
 }
 
 function utl_turn_message() {
+	console.log("utl_turn_message()");
 	if (game.piece == game.turn) {
 		game.message = "あなたの番です";
 	} else {
@@ -197,6 +197,9 @@ function utl_turn_message() {
 }
 
 function utl_win_lose_message() {
+	console.log("utl_win_lose_message()");
+	console.log(" winpiece : " + game.winpiece);
+	console.log(" piece    : " + game.piece);
 	if (game.winpiece == "-") {
 		game.message = "引き分けでした";
 	} else if (game.piece == game.winpiece) {
@@ -209,7 +212,7 @@ function utl_win_lose_message() {
 
 function init_game() {
 	game.status = "";
-	game.userid = "";
+	game.user = "";
 	game.id = "";
 	game.targetid = "";
 	game.turn = "O";
@@ -217,17 +220,19 @@ function init_game() {
 	game.piece = "";
 	game.map = [ [ "", "", "" ], [ "", "", "" ], [ "", "", "" ] ];
 	game.winpiece = "";
+	game.message = "";
 }
 
 function reset_game() {
-	game.status = "login"
-	game.map = [ [ "", "", "" ], [ "", "", "" ], [ "", "", "" ] ];
-	game.winpiece = "";
-	game.number = 0;
+	init_game();
+	game.status = "login";
+	game.user = get_loginuser();
 
 	for (var i = 1; i <= 9; i++) {
 		$("#grid_" + i).text("");
 	}
+
+	utl_set_message("");
 }
 
 /* ------------------------------------------------------------------------
@@ -252,7 +257,7 @@ $(document).ready(function() {
 	// ゲーム用websocket
 	var user = get_loginuser();
 	var uri = "ws://" + location.host + "/websocket/game" + '?' + user;
-	game.userid = user;
+	game.user = user;
 
 	ws = new WebSocket(uri);
 	ws.onopen = function() {
@@ -343,10 +348,6 @@ function makeUserTable(data) {
 			var button = document.getElementById(data.login_list[i].id);
 			button.addEventListener("click", function (event) {
 				console.log("session id : " + this.id);
-				var target = $(event.target);
-
-				target.text("依頼");
-				game.button = target;
 				send_play_matchWithReq(this.id);
 			});
 		}
@@ -370,12 +371,16 @@ function recv_login_list(data) {
 function send_play_matchWithReq(sessionid) {
 	console.log("send_play_matchWithReq()");
 
+	if (game.status != "login") {
+		return;
+	}
+
 	var data = {};
 
 	data.proto = "matchWithReq";
 	game.targetid =
 		data.targetID = sessionid;
-	data.user = game.userid;
+	data.user = game.user;
 	data.status = "";
 
 	console.log(data);
@@ -392,28 +397,54 @@ function send_play_matchWithRep(data, status) {
 	data.status = status;
 
 	game.targetid = data.targetID;
+	game.target_user = get_target_user(game.targetid);
+
 
 	ws.send(JSON.stringify(data));
 }
 
+function get_target_user(targetid) {
+	var i;
+	var c;
+	var user;
+	c = game.login_list.length;
+	console.log("targetid : " + targetid);
+	for (i = 0; i < c; i++) {
+		if (game.login_list[i].id == targetid) {
+			console.log("id : " + game.login_list[i].id);
+			user = game.login_list[i].user;
+			return user;
+		}
+	}
+	return "";
+}
+
 function show_dialog(data) {
-		$("#show_dialog").dialog({
-			modal : true,
-			title : data.targetID + "と対戦",
-			buttons : {
-				"OK" : function() {
-					$(this).dialog("close");
-					send_play_matchWithRep(data, "OK");
-				},
-				"キャンセル" : function() {
-					$(this).dialog("close");
-					send_play_matchWithRep(data, "NG");
-				}
+	console.log("show_dialog()");
+
+	game.target_user = get_target_user(data.targetID);
+
+	$("#show_dialog").html(game.target_user + "から対戦の申し込みが来ています");
+
+	$("#show_dialog").dialog({
+		modal : true,
+		title : game.target_user + "と対戦",
+		buttons : {
+			"OK" : function() {
+				$(this).dialog("close");
+				send_play_matchWithRep(data, "OK");
+			},
+			"キャンセル" : function() {
+				$(this).dialog("close");
+				send_play_matchWithRep(data, "NG");
 			}
-		});
+		}
+	});
 }
 
 function show_game_end_dialog() {
+	console.log("show_game_end_dialog()");
+
 	$("#show_dialog").html(game.message);
 	$("#show_dialog").dialog({
 		modal : true,
@@ -437,6 +468,7 @@ function recv_play_matchWithReq(data) {
 	console.log("recv_play_matchWithReq()");
 
 	if (game.status == "login") {
+
 		show_dialog(data);
 	}
 }
@@ -484,8 +516,8 @@ function send_play_matching() {
 
 	json.proto = "matching";
 	json.targetID = game.targetid;
-	json.user = game.userid;
-	game.numver++;
+	json.user = game.user;
+	game.number++;
 	var status = {};
 	status.gridid = game.gridid;
 	status.number = game.number;
@@ -526,7 +558,7 @@ function recv_play_matching(data) {
 	}
 
 	game.number = Number(wsRes.number);
-	game.numver++;
+	game.number++;
 	game.turn = game.piece;
 
 	utl_turn_message();
@@ -545,7 +577,7 @@ function send_play_matchEnd(data) {
 
 	json.proto = "matchEnd";
 	json.targetID = game.targetid;
-	json.user = game.userid;
+	json.user = game.user;
 	switch (game.winpiece) {
 	case "O":
 		json.result = "WIN";
@@ -561,7 +593,7 @@ function send_play_matchEnd(data) {
 		break;
 	}
 	console.log("json.result : " + json.result);
-	game.numver++;
+	game.number++;
 	var status = {};
 	status.gridid = game.gridid;
 	status.number = game.number;
