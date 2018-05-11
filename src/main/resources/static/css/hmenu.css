@@ -313,6 +313,13 @@ ul {
 		justify-content: center;
 }
 
+.marupeke-x {
+	color: #ff0000;
+}
+.marupeke-o {
+	color: #0000ff;
+}
+
 .marupeke:nth-of-type(3n + 1)  {
 		clear:left
 }
