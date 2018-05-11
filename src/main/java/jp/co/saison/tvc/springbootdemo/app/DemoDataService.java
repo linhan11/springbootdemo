@@ -37,4 +37,7 @@ public class DemoDataService {
         return repository.save(data);
     }
 
+    public List<DemoData> findByName(String name) {
+    	return repository.findByNameContainsOrderByIdAsc(name);
+    }
 }
