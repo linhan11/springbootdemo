@@ -18,6 +18,10 @@ public class GameData {
   private String end_date;
   private String data;// 盤データ
 
+  protected GameData() {
+    this.end_date = new SimpleDateFormat("yyyy'年'MM'月'dd'日'k'時'mm'分'ss'秒'").format(new Date());
+  }
+
   protected GameData(String id, String first, String second, String result, String data) {
     this.id = id;
     this.first = first;

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -127,15 +126,22 @@ public class GameHandler extends TextWebSocketHandler {
                        // "status":"盤データ","result":"WIN/LOSE/SUSPEND/DRAW"}
 
         // 対戦結果をセーブ
-        String first = myGameData.isFirst() ? myID : targetID;
-        String second = myGameData.isFirst() ? targetID : myID;
-        serviceGame.save(myGameData.getGameID(), first, second, myGameData.getResult(),
-            myGameData.getStatus());
+        String first = myGameData.isFirst() ? myGameData.getUser() : targetGameData.getUser();
+        String second = myGameData.isFirst() ? targetGameData.getUser() : myGameData.getUser();
+
+        System.out.printf("id:%s result:%s statis:%s\n",
+            myGameData.getGameID()==null?"null":myGameData.getGameID(),
+            msgToGameJson.getResult() == null?"null":msgToGameJson.getResult(),
+                msgToGameJson.getStatus() == null ? "null": msgToGameJson.getStatus()  );
+        System.out.println(serviceGame);
+
+        serviceGame.save(myGameData.getGameID(), first, second, msgToGameJson.getResult(),
+            msgToGameJson.getStatus());
 
         // それぞれのユーザの対戦成績を反映
         DemoUser user1st = serviceUser.findOne(first);
         DemoUser user2nd = serviceUser.findOne(second);
-        switch (myGameData.getResult()) {
+        switch (msgToGameJson.getResult()) {
           case "WIN":
             user1st.setWin(user1st.getWin() + 1);
             user2nd.setLose(user2nd.getLose() + 1);
@@ -160,10 +166,10 @@ public class GameHandler extends TextWebSocketHandler {
       default:
         break;
     }
-
-    System.out.printf("sessionID:%s message:%s %s %s\n", myID, message.getPayload(),
-        myGameData.getStartDate(), msgToGameJson);
+    // 全ての接続に対し、ログインリストの更新を通知する
     sendUserList();
+
+    // System.out.printf("handleTextMessage session:%s message:%s\n", myID, message.getPayload());
   }
 
   private void sendMSG(String targetID, String msg) {
@@ -182,15 +188,14 @@ public class GameHandler extends TextWebSocketHandler {
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
     String sessionID = session.getId();
 
-    //クローズされたセッションをデータプールから取り除く
+    // クローズされたセッションをデータプールから取り除く
     gameSessionData.remove(sessionID);
 
     // TODO:対戦中の場合は、相手ユーザに通知する
 
     // 全ての接続に対し、ログインリストの更新を通知する
     sendUserList();
-
-    System.out.printf("session close sessionID:%s\n", sessionID);
+    // System.out.printf("session close sessionID:%s\n", sessionID);
   }
 
 }
