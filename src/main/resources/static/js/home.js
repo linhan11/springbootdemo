@@ -79,6 +79,7 @@ function check_map() {
 	var y = 0;
 	var piece;
 
+	// grid を 2次元配列に落とす
 	grid_to_map();
 
 	for (y = 0; y < 3; y++) {
@@ -110,7 +111,17 @@ function check_map() {
 			return piece;
 		}
 	}
-	return "";
+
+	// 引き分けか？
+	for (x = 0; x < 3; x++) {
+		for (y = 0; y < 3; y++) {
+			if (game.map[y][x] == "") {
+				return "";
+			}
+		}
+	}
+
+	return "-";
 }
 
 function check_win_lose() {
@@ -151,6 +162,9 @@ function set_piece() {
 
 	if (check_win_lose()) {
 		console.log("win piece : " + game.winpiece);
+		utl_win_lose_message();
+		show_game_end_dialog();
+		return;
 	}
 
 	if (game.turn == "X") {
@@ -175,10 +189,22 @@ function utl_set_message(msg) {
 
 function utl_turn_message() {
 	if (game.piece == game.turn) {
-		utl_set_message("あなたの番です");
+		game.message = "あなたの番です";
 	} else {
-		utl_set_message("あいての番です");
+		game.message = "あいての番です";
 	}
+	utl_set_message(game.message);
+}
+
+function utl_win_lose_message() {
+	if (game.winpiece == "-") {
+		game.message = "引き分けでした";
+	} else if (game.piece == game.winpiece) {
+		game.message = "あなたの勝ちです";
+	} else {
+		game.message = "あなたの負けです";
+	}
+	utl_set_message(game.message);
 }
 
 function init_game() {
@@ -194,7 +220,14 @@ function init_game() {
 }
 
 function reset_game() {
+	game.status = "login"
+	game.map = [ [ "", "", "" ], [ "", "", "" ], [ "", "", "" ] ];
+	game.winpiece = "";
+	game.number = 0;
 
+	for (var i = 1; i <= 9; i++) {
+		$("#grid_" + i).text("");
+	}
 }
 
 /* ------------------------------------------------------------------------
@@ -363,17 +396,7 @@ function send_play_matchWithRep(data, status) {
 	ws.send(JSON.stringify(data));
 }
 
-/*
- * 対戦の申し込み結果の受信
- * 　ダイアログを表示し、許可 or 拒否
- * 　大戦中であれば　拒否 (Serverで実装）
- *  {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
- */
-
-function recv_play_matchWithReq(data) {
-	console.log("recv_play_matchWithReq()");
-
-	if (game.status == "login") {
+function show_dialog(data) {
 		$("#show_dialog").dialog({
 			modal : true,
 			title : data.targetID + "と対戦",
@@ -388,6 +411,33 @@ function recv_play_matchWithReq(data) {
 				}
 			}
 		});
+}
+
+function show_game_end_dialog() {
+	$("#show_dialog").html(game.message);
+	$("#show_dialog").dialog({
+		modal : true,
+		title : game.targetid + "と対戦結果",
+		buttons : {
+			"OK" : function() {
+				$(this).dialog("close");
+				reset_game();
+			}
+		}
+	});
+}
+
+/*
+ * 対戦の申し込み結果の受信
+ * 　ダイアログを表示し、許可 or 拒否
+ * 　大戦中であれば　拒否 (Serverで実装）
+ *  {"proto":"matchWithRep","targetID":"targetSeesionID","status":"OK or NG"}
+ */
+function recv_play_matchWithReq(data) {
+	console.log("recv_play_matchWithReq()");
+
+	if (game.status == "login") {
+		show_dialog(data);
 	}
 }
 
@@ -396,7 +446,7 @@ function recv_play_matchWithReq(data) {
  * 依頼した側に、対戦申込みの結果が来る（NG only）
  */
 function recv_play_matchWithRep(data) {
-	console.log("recv_play_matchWithRep");
+	console.log("recv_play_matchWithRep()");
 	game.status = "login";
 	console.log(" NG だった?");
 	console.log(" status : " + data.status);
@@ -430,25 +480,27 @@ function recv_play_matchStart(data) {
  */
 function send_play_matching() {
 	console.log("send_play_matching");
-	var data = {};
+	var json = {};
 
-	data.proto = "matching";
-	data.targetID = game.targetid;
-	data.user = game.userid;
+	json.proto = "matching";
+	json.targetID = game.targetid;
+	json.user = game.userid;
 	game.numver++;
 	var status = {};
 	status.gridid = game.gridid;
 	status.number = game.number;
 	status.turn = game.turn;
-	data.status = JSON.stringify(JSON.stringify(status));
+	json.status = JSON.stringify(JSON.stringify(status));
 
-	console.log(data);
-	ws.send(JSON.stringify(data));
+	console.log(json);
+	ws.send(JSON.stringify(json));
 }
 
 /*
  * 対戦中　相手から受信
- *
+ *  ・相手から受信した、駒の位置を盤に反映し、
+ *  ・勝敗判定を行う
+ *  ・勝ち負けが決まったら、対戦終了を通知する
  */
 function recv_play_matching(data) {
 	console.log("recv_play_matching");
@@ -469,6 +521,8 @@ function recv_play_matching(data) {
 
 	if (check_win_lose()) {
 		console.log("win piece : " + game.winpiece);
+		send_play_matchEnd(data);
+		return;
 	}
 
 	game.number = Number(wsRes.number);
@@ -476,6 +530,49 @@ function recv_play_matching(data) {
 	game.turn = game.piece;
 
 	utl_turn_message();
+}
+
+/*
+ * 対戦終了
+ * {"proto":"matchEnd", "targetID":"targetID","status":"盤データ","result":"WIN/LOSE/SUSPEND/DRAW"}
+ *
+ */
+function send_play_matchEnd(data) {
+	console.log("send_play_matchEnd()");
+	console.log("piece : " + game.winpiece);
+
+	var json = {};
+
+	json.proto = "matchEnd";
+	json.targetID = game.targetid;
+	json.user = game.userid;
+	switch (game.winpiece) {
+	case "O":
+		json.result = "WIN";
+		break;
+	case "X":
+		json.result = "LOSE";
+		break;
+	case "-":
+		json.result = "DRAW";
+		break;
+	default:
+		alert('エラーが発生しました。[' + game.winpiece + ']');
+		break;
+	}
+	console.log("json.result : " + json.result);
+	game.numver++;
+	var status = {};
+	status.gridid = game.gridid;
+	status.number = game.number;
+	status.turn = game.turn;
+	json.status = JSON.stringify(JSON.stringify(status));
+
+	console.log(json);
+	ws.send(JSON.stringify(json));
+
+	utl_win_lose_message();
+	show_game_end_dialog();
 }
 
 $(function() {
