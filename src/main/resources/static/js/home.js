@@ -173,6 +173,7 @@ function set_piece() {
 
 	if (judge_win_lose()) {
 		console.log("win piece : " + game.winpiece);
+		console.log("targetid : " + game.targetid);
 		utl_win_lose_message();
 		show_game_end_dialog();
 		return;
@@ -400,6 +401,7 @@ function send_play_matchWithReq(sessionid) {
 	data.proto = "matchWithReq";
 	game.targetid =
 		data.targetID = sessionid;
+	game.target_user = get_target_user(game.targetid);
 	data.user = game.user;
 	data.status = "";
 
