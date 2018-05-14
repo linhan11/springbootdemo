@@ -300,12 +300,12 @@ ul {
 .marupeke {
         float: left;
 
-        width: 60px;
-        height: 60px;
+        width: 90px;
+        height: 90px;
         outline:1px solid #000;
         background: white;
 
-        font-size: 60px;
+        font-size: 90px;
         overflow: hidden;
 
         display:flex;
