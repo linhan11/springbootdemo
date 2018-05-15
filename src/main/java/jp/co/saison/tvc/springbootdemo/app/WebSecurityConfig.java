@@ -2,7 +2,6 @@ package jp.co.saison.tvc.springbootdemo.app;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll();
 
         /**
-         * CSRF“K—pURL”»’fƒNƒ‰ƒX
+         * CSRFé©ç”¨URLåˆ¤æ–­ã‚¯ãƒ©ã‚¹
          */
 
         RequestMatcher csrfRequestMatcher = new RequestMatcher() {
@@ -55,12 +54,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             @Override
             public boolean matches(HttpServletRequest request) {
 
-                // GET‚È‚çCSRF‚Ìƒ`ƒFƒbƒN‚Í‚µ‚È‚¢
+                // GETãªã‚‰CSRFã®ãƒã‚§ãƒƒã‚¯ã¯ã—ãªã„
                 if("GET".equals(request.getMethod())) {
                     return false;
                 }
 
-                // “Á’è‚ÌURL‚ÉŠY“–‚·‚éê‡ACSRFƒ`ƒFƒbƒN‚µ‚È‚¢
+                // ç‰¹å®šã®URLã«è©²å½“ã™ã‚‹å ´åˆã€CSRFãƒã‚§ãƒƒã‚¯ã—ãªã„
                 return !disabledRequestMatcher.matches(request);
             }
 
